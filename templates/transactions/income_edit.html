@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Editar Ingreso - FinanceIQ{% endblock %}
+{% block page_title %}Editar Ingreso{% endblock %}
+{% block page_subtitle %}Actualiza los datos del ingreso{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Descripción *
+                </label>
+                <input type="text" name="description" required
+                    value="{{ income.description }}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Monto *
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input type="number" name="amount" required
+                        value="{{ income.amount }}"
+                        min="0.01" step="0.01"
+                        class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl
+                               focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Fuente
+                </label>
+                <input type="text" name="source"
+                    value="{{ income.source|default:'' }}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                    placeholder="Empresa, cliente, etc.">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Fecha *
+                </label>
+                <input type="date" name="date" required
+                    value="{{ income.date|date:'Y-m-d' }}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Categoría
+                </label>
+                <select name="category"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                    <option value="">Sin categoría</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}"
+                        {% if income.category and income.category.id == cat.id %}selected{% endif %}>
+                        {{ cat.icon }} {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    Recurrencia
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {% for value, label in recurrence_choices %}
+                    <label class="flex items-center justify-center gap-2 p-3 border-2 border-gray-200
+                                  rounded-xl cursor-pointer hover:border-indigo-400 transition-colors
+                                  has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                        <input type="radio" name="recurrence" value="{{ value }}"
+                            {% if income.recurrence == value %}checked{% endif %}
+                            class="sr-only">
+                        <span class="text-sm font-medium text-gray-700">{{ label }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Notas
+                </label>
+                <textarea name="notes" rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition resize-none"
+                    placeholder="Información adicional...">{{ income.notes|default:'' }}</textarea>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn-primary flex-1 py-3">
+                    💾 Guardar Cambios
+                </button>
+                <a href="{% url 'income_list' %}"
+                   class="btn-secondary flex-1 py-3 text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

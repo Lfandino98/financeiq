@@ -1,0 +1,24 @@
+# ============================================================
+# FINANCEIQ - DEPENDENCIAS
+# ============================================================
+
+# Django Core
+Django==4.2.9
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+
+# Base de datos
+psycopg2-binary==2.9.9
+
+# Variables de entorno
+python-dotenv==1.0.0
+
+# Utilidades
+Pillow==10.2.0
+
+# Desarrollo y testing
+coverage==7.4.0
+
+# Producción (opcional)
+gunicorn==21.2.0
+whitenoise==6.6.0

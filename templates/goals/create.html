@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block title %}Nueva Meta - FinanceIQ{% endblock %}
+{% block page_title %}Nueva Meta Financiera{% endblock %}
+{% block page_subtitle %}Define tu próximo objetivo de ahorro{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Nombre -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Nombre de la meta *
+                </label>
+                <input type="text" name="name" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                    placeholder="Ej: Fondo de emergencia, Viaje a Europa...">
+            </div>
+
+            <!-- Tipo de meta -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    Tipo de meta *
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {% for value, label in goal_types %}
+                    <label class="flex flex-col items-center gap-2 p-4 border-2 border-gray-200
+                                  rounded-xl cursor-pointer hover:border-indigo-400 transition-colors
+                                  has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                        <input type="radio" name="goal_type" value="{{ value }}"
+                            {% if value == 'savings' %}checked{% endif %}
+                            class="sr-only">
+                        <span class="text-3xl">
+                            {% if value == 'savings' %}🏦
+                            {% elif value == 'debt_payment' %}💳
+                            {% elif value == 'investment' %}📈
+                            {% elif value == 'emergency_fund' %}🛡️
+                            {% elif value == 'purchase' %}🛍️
+                            {% else %}🎯{% endif %}
+                        </span>
+                        <span class="text-xs font-medium text-gray-700 text-center">
+                            {{ label }}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Monto objetivo -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Monto objetivo *
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                    <input type="number" name="target_amount" required
+                        min="1" step="0.01" id="targetAmount"
+                        class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl
+                               focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                        placeholder="0.00">
+                </div>
+            </div>
+
+            <!-- Fecha objetivo -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Fecha objetivo *
+                </label>
+                <input type="date" name="target_date" required
+                    min="{{ today }}" id="targetDate"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
+            </div>
+
+            <!-- Calculadora de ahorro mensual -->
+            <div id="savingsCalculator"
+                 class="hidden bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                <p class="text-sm font-semibold text-indigo-800 mb-2">
+                    💡 Calculadora de Ahorro
+                </p>
+                <p class="text-sm text-indigo-600">
+                    Para alcanzar tu meta necesitas ahorrar aproximadamente
+                    <strong id="monthlyNeeded" class="text-indigo-800">$0</strong>
+                    por mes.
+                </p>
+            </div>
+
+            <!-- Descripción -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Descripción <span class="text-gray-400 font-normal">(opcional)</span>
+                </label>
+                <textarea name="description" rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition resize-none"
+                    placeholder="¿Por qué es importante esta meta para ti?"></textarea>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn-primary flex-1 py-3">
+                    🎯 Crear Meta
+                </button>
+                <a href="{% url 'goal_list' %}"
+                   class="btn-secondary flex-1 py-3 text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const targetAmount = document.getElementById('targetAmount');
+const targetDate = document.getElementById('targetDate');
+const calculator = document.getElementById('savingsCalculator');
+const monthlyNeeded = document.getElementById('monthlyNeeded');
+
+function updateCalculator() {
+    const amount = parseFloat(targetAmount.value) || 0;
+    const dateVal = targetDate.value;
+
+    if (amount > 0 && dateVal) {
+        const today = new Date();
+        const target = new Date(dateVal);
+        const diffTime = target - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffMonths = Math.max(diffDays / 30, 1);
+        const monthly = amount / diffMonths;
+
+        monthlyNeeded.textContent = '$' + monthly.toLocaleString('es', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+        calculator.classList.remove('hidden');
+    } else {
+        calculator.classList.add('hidden');
+    }
+}
+
+targetAmount.addEventListener('input', updateCalculator);
+targetDate.addEventListener('change', updateCalculator);
+</script>
+{% endblock %}

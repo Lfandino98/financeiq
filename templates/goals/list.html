@@ -1,0 +1,228 @@
+{% extends 'base.html' %}
+{% block title %}Metas Financieras - FinanceIQ{% endblock %}
+{% block page_title %}Metas Financieras{% endblock %}
+{% block page_subtitle %}Gestiona tus objetivos de ahorro{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'goal_create' %}" class="btn-primary flex items-center gap-2">
+    <span>+</span> Nueva Meta
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Resumen de Metas -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="card text-center">
+        <p class="text-3xl font-bold text-indigo-600">{{ summary.total_goals }}</p>
+        <p class="text-sm text-gray-500 mt-1">Total metas</p>
+    </div>
+    <div class="card text-center">
+        <p class="text-3xl font-bold text-green-600">{{ summary.active_goals }}</p>
+        <p class="text-sm text-gray-500 mt-1">Activas</p>
+    </div>
+    <div class="card text-center">
+        <p class="text-3xl font-bold text-purple-600">{{ summary.completed_goals }}</p>
+        <p class="text-sm text-gray-500 mt-1">Completadas</p>
+    </div>
+    <div class="card text-center">
+        <p class="text-3xl font-bold text-indigo-600">{{ summary.overall_progress|floatformat:1 }}%</p>
+        <p class="text-sm text-gray-500 mt-1">Progreso total</p>
+    </div>
+</div>
+
+<!-- Lista de Metas -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for goal in goals %}
+    <div class="card relative overflow-hidden">
+
+        <!-- Status badge -->
+        <div class="absolute top-4 right-4">
+            <span class="text-xs font-medium px-2 py-1 rounded-full
+                {% if goal.status == 'active' %}bg-green-100 text-green-700
+                {% elif goal.status == 'completed' %}bg-purple-100 text-purple-700
+                {% elif goal.status == 'paused' %}bg-yellow-100 text-yellow-700
+                {% else %}bg-gray-100 text-gray-500{% endif %}">
+                {% if goal.status == 'active' %}🟢 Activa
+                {% elif goal.status == 'completed' %}✅ Completada
+                {% elif goal.status == 'paused' %}⏸️ Pausada
+                {% else %}❌ Cancelada{% endif %}
+            </span>
+        </div>
+
+        <!-- Goal type icon -->
+        <div class="text-4xl mb-3">
+            {% if goal.goal_type == 'savings' %}🏦
+            {% elif goal.goal_type == 'debt_payment' %}💳
+            {% elif goal.goal_type == 'investment' %}📈
+            {% elif goal.goal_type == 'emergency_fund' %}🛡️
+            {% elif goal.goal_type == 'purchase' %}🛍️
+            {% else %}🎯{% endif %}
+        </div>
+
+        <h3 class="text-lg font-bold text-gray-800 mb-1 pr-20">{{ goal.name }}</h3>
+
+        {% if goal.description %}
+        <p class="text-sm text-gray-500 mb-4">{{ goal.description|truncatechars:80 }}</p>
+        {% endif %}
+
+        <!-- Progress bar -->
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-500">Progreso</span>
+                <span class="text-sm font-bold text-indigo-600">
+                    {{ goal.progress_percentage|floatformat:1 }}%
+                </span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="h-3 rounded-full transition-all duration-500
+                    {% if goal.progress_percentage >= 100 %}bg-green-500
+                    {% elif goal.progress_percentage >= 50 %}bg-indigo-500
+                    {% else %}bg-yellow-500{% endif %}"
+                     style="width: {{ goal.progress_percentage|floatformat:0 }}%">
+                </div>
+            </div>
+        </div>
+
+        <!-- Amounts -->
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-xs text-gray-400">Acumulado</p>
+                <p class="text-base font-bold text-green-600">
+                    ${{ goal.current_amount|floatformat:0 }}
+                </p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-3">
+                <p class="text-xs text-gray-400">Objetivo</p>
+                <p class="text-base font-bold text-gray-800">
+                    ${{ goal.target_amount|floatformat:0 }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Date info -->
+        <div class="flex items-center justify-between text-xs text-gray-400 mb-4">
+            <span>📅 Meta: {{ goal.target_date|date:"d M Y" }}</span>
+            {% with days=goal.target_date|timeuntil %}
+            <span class="{% if goal.status == 'active' and goal.target_date < today %}text-red-500{% endif %}">
+                {% if goal.status == 'active' %}
+                    ⏱️ {{ days }}
+                {% endif %}
+            </span>
+            {% endwith %}
+        </div>
+
+        <!-- Contribución mensual sugerida -->
+        {% if goal.status == 'active' and goal.monthly_contribution > 0 %}
+        <div class="bg-indigo-50 rounded-xl p-3 mb-4">
+            <p class="text-xs text-indigo-600">
+                💡 Ahorra <strong>${{ goal.monthly_contribution|floatformat:0 }}/mes</strong>
+                para alcanzar tu meta
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="flex gap-2">
+            {% if goal.status == 'active' %}
+            <!-- Contribuir -->
+            <button onclick="openContributeModal('{{ goal.id }}', '{{ goal.name }}')"
+                class="flex-1 bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2 px-3 rounded-lg transition-colors">
+                + Contribuir
+            </button>
+            {% endif %}
+
+            <a href="{% url 'goal_edit' goal.id %}"
+               class="flex-1 btn-secondary text-center text-sm py-2">
+                ✏️ Editar
+            </a>
+
+            <form method="POST" action="{% url 'goal_delete' goal.id %}"
+                  onsubmit="return confirm('¿Eliminar esta meta?')">
+                {% csrf_token %}
+                <button type="submit"
+                    class="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                    🗑️
+                </button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-span-3 text-center py-16">
+        <p class="text-6xl mb-4">🎯</p>
+        <p class="text-xl font-bold text-gray-700">No tienes metas financieras</p>
+        <p class="text-gray-400 mt-2">Crea tu primera meta y comienza a ahorrar con propósito</p>
+        <a href="{% url 'goal_create' %}" class="inline-block mt-6 btn-primary px-8 py-3">
+            + Crear mi primera meta
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Modal de Contribución -->
+<div id="contributeModal"
+     class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-2">💰 Agregar Contribución</h3>
+        <p class="text-gray-500 text-sm mb-6" id="modalGoalName"></p>
+
+        <form method="POST" id="contributeForm">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Monto a contribuir
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                        type="number"
+                        name="amount"
+                        required
+                        min="0.01"
+                        step="0.01"
+                        class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                        placeholder="0.00"
+                        id="contributeAmount"
+                    >
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" class="flex-1 btn-primary py-3">
+                    ✅ Confirmar
+                </button>
+                <button type="button"
+                    onclick="closeContributeModal()"
+                    class="flex-1 btn-secondary py-3">
+                    Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openContributeModal(goalId, goalName) {
+    const modal = document.getElementById('contributeModal');
+    const form = document.getElementById('contributeForm');
+    const nameEl = document.getElementById('modalGoalName');
+
+    form.action = `/metas/${goalId}/contribuir/`;
+    nameEl.textContent = `Meta: ${goalName}`;
+    modal.classList.remove('hidden');
+    document.getElementById('contributeAmount').focus();
+}
+
+function closeContributeModal() {
+    document.getElementById('contributeModal').classList.add('hidden');
+}
+
+// Cerrar modal al hacer click fuera
+document.getElementById('contributeModal').addEventListener('click', function(e) {
+    if (e.target === this) closeContributeModal();
+});
+</script>
+{% endblock %}

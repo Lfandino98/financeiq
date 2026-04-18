@@ -1,0 +1,201 @@
+# ============================================================
+# PASO 1: Clonar y configurar el proyecto
+# ============================================================
+
+# Crear directorio del proyecto
+mkdir financeiq && cd financeiq
+
+# Crear entorno virtual
+python -m venv venv
+
+# Activar entorno virtual
+# En Linux/Mac:
+source venv/bin/activate
+# En Windows:
+venv\Scripts\activate
+
+# ============================================================
+# PASO 2: Instalar dependencias
+# ============================================================
+
+pip install -r requirements.txt
+
+# ============================================================
+# PASO 3: Configurar variables de entorno
+# ============================================================
+
+cp .env.example .env
+# Editar .env con tus credenciales de PostgreSQL
+
+# ============================================================
+# PASO 4: Crear base de datos PostgreSQL
+# ============================================================
+
+# Conectarse a PostgreSQL
+psql -U postgres
+
+Ruta postgres
+C:\Program Files\PostgreSQL\16\data
+
+# Crear base de datos
+CREATE DATABASE financeiq_db;
+CREATE USER financeiq_user WITH PASSWORD 'tu_password';
+GRANT ALL PRIVILEGES ON DATABASE financeiq_db TO financeiq_user;
+\q
+
+# ============================================================
+# PASO 5: Crear estructura de directorios
+# ============================================================
+
+mkdir -p apps/core/management/commands
+mkdir -p templates/{auth,dashboard,transactions,goals,analysis,alerts,categories}
+mkdir -p static/js
+
+# Crear archivos __init__.py necesarios
+touch apps/__init__.py
+touch apps/core/__init__.py
+touch apps/api/__init__.py
+touch apps/core/management/__init__.py
+touch apps/core/management/commands/__init__.py
+
+# ============================================================
+# PASO 6: Ejecutar migraciones
+# ============================================================
+
+python manage.py makemigrations core
+python manage.py migrate
+
+# ============================================================
+# PASO 7: Crear superusuario (admin)
+# ============================================================
+
+python manage.py createsuperuser
+admin
+123456789
+# ============================================================
+# PASO 8: Poblar con datos de ejemplo
+# ============================================================
+
+# Datos básicos (3 meses de historia)
+python manage.py seed_data --username demo --months 3
+
+# Con más historia y limpieza previa
+python manage.py seed_data --username demo --months 6 --clear
+
+# ============================================================
+# PASO 9: Ejecutar servidor de desarrollo
+# ============================================================
+
+python manage.py runserver
+
+# ============================================================
+# PASO 10: Acceder a la aplicación
+# ============================================================
+
+# Aplicación principal:
+# http://localhost:8000
+# Usuario: demo
+# Contraseña: demo1234
+
+# Panel de administración:
+# http://localhost:8000/admin
+
+# API REST:
+# http://localhost:8000/api/v1/
+
+# ============================================================
+# ENDPOINTS DE LA API REST
+# ============================================================
+
+# Categorías
+GET    /api/v1/categories/
+POST   /api/v1/categories/
+GET    /api/v1/categories/{id}/
+PUT    /api/v1/categories/{id}/
+DELETE /api/v1/categories/{id}/
+
+# Ingresos
+GET    /api/v1/incomes/?period=month
+POST   /api/v1/incomes/
+GET    /api/v1/incomes/{id}/
+PUT    /api/v1/incomes/{id}/
+DELETE /api/v1/incomes/{id}/
+
+# Gastos
+GET    /api/v1/expenses/?period=month&category={id}
+POST   /api/v1/expenses/
+GET    /api/v1/expenses/{id}/
+PUT    /api/v1/expenses/{id}/
+DELETE /api/v1/expenses/{id}/
+
+# Análisis
+GET    /api/v1/analysis/?period=month
+GET    /api/v1/summary/
+POST   /api/v1/classify/
+
+# Objetivos
+GET    /api/v1/goals/?status=active
+POST   /api/v1/goals/
+GET    /api/v1/goals/{id}/
+PUT    /api/v1/goals/{id}/
+DELETE /api/v1/goals/{id}/
+POST   /api/v1/goals/{id}/contribute/
+
+# Alertas
+GET    /api/v1/alerts/
+PATCH  /api/v1/alerts/{id}/
+
+# Snapshots
+GET    /api/v1/snapshots/
+POST   /api/v1/snapshots/
+
+# ============================================================
+# EJEMPLO DE USO DE LA API CON CURL
+# ============================================================
+
+# Login (obtener sesión)
+curl -X POST http://localhost:8000/login/ \
+  -d "username=demo&password=demo1234"
+
+# Registrar gasto
+curl -X POST http://localhost:8000/api/v1/expenses/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "25000",
+    "description": "Pizza Dominos",
+    "date": "2024-01-15"
+  }'
+
+# Clasificar gasto automáticamente
+curl -X POST http://localhost:8000/api/v1/classify/ \
+  -H "Content-Type: application/json" \
+  -d '{"description": "Uber al aeropuerto"}'
+
+# Obtener análisis financiero completo
+curl -X GET http://localhost:8000/api/v1/analysis/?period=month
+
+# Obtener resumen rápido
+curl -X GET http://localhost:8000/api/v1/summary/
+
+# Crear objetivo financiero
+curl -X POST http://localhost:8000/api/v1/goals/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Fondo de emergencia",
+    "goal_type": "emergency_fund",
+    "target_amount": "5000000",
+    "target_date": "2025-12-31"
+  }'
+
+# Agregar contribución a objetivo
+curl -X POST http://localhost:8000/api/v1/goals/{id}/contribute/ \
+  -H "Content-Type: application/json" \
+  -d '{"amount": "500000"}'
+
+# Obtener alertas
+curl -X GET http://localhost:8000/api/v1/alerts/
+
+# Descartar alerta
+curl -X PATCH http://localhost:8000/api/v1/alerts/{id}/ \
+  -H "Content-Type: application/json" \
+  -d '{"action": "dismiss"}'

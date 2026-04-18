@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Ingresos - FinanceIQ{% endblock %}
+{% block page_title %}Mis Ingresos{% endblock %}
+{% block page_subtitle %}Gestiona tus fuentes de ingreso{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'income_create' %}" class="btn-primary flex items-center gap-2">
+    <span>+</span> Nuevo Ingreso
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filtros y Total -->
+<div class="card mb-6">
+    <form method="GET" class="flex flex-wrap items-center gap-4">
+        <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-gray-600">Período:</label>
+            <select name="period" onchange="this.form.submit()"
+                class="px-3 py-2 border border-gray-300 rounded-lg text-sm
+                       focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="week" {% if period == 'week' %}selected{% endif %}>Esta semana</option>
+                <option value="month" {% if period == 'month' %}selected{% endif %}>Este mes</option>
+                <option value="quarter" {% if period == 'quarter' %}selected{% endif %}>Trimestre</option>
+                <option value="year" {% if period == 'year' %}selected{% endif %}>Este año</option>
+                <option value="all" {% if period == 'all' %}selected{% endif %}>Todo</option>
+            </select>
+        </div>
+        <div class="ml-auto text-right">
+            <p class="text-sm text-gray-500">Total del período</p>
+            <p class="text-2xl font-bold text-green-600">
+                ${{ total|floatformat:0 }}
+            </p>
+        </div>
+    </form>
+</div>
+
+<!-- Lista de Ingresos -->
+<div class="card">
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-gray-100">
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-500">Descripción</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-500">Fuente</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-500">Categoría</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-500">Fecha</th>
+                    <th class="text-left py-3 px-4 text-sm font-semibold text-gray-500">Recurrencia</th>
+                    <th class="text-right py-3 px-4 text-sm font-semibold text-gray-500">Monto</th>
+                    <th class="text-center py-3 px-4 text-sm font-semibold text-gray-500">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-50">
+                {% for income in incomes %}
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-4">
+                        <p class="text-sm font-medium text-gray-800">
+                            {{ income.description }}
+                        </p>
+                        {% if income.notes %}
+                        <p class="text-xs text-gray-400 mt-0.5">
+                            {{ income.notes|truncatechars:40 }}
+                        </p>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-4">
+                        <p class="text-sm text-gray-600">
+                            {{ income.source|default:"—" }}
+                        </p>
+                    </td>
+                    <td class="py-3 px-4">
+                        {% if income.category %}
+                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                              style="background-color: {{ income.category.color }}20;
+                                     color: {{ income.category.color }}">
+                            {{ income.category.icon }} {{ income.category.name }}
+                        </span>
+                        {% else %}
+                        <span class="text-xs text-gray-400">Sin categoría</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 px-4">
+                        <p class="text-sm text-gray-600">
+                            {{ income.date|date:"d M Y" }}
+                        </p>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="text-xs px-2 py-1 rounded-full
+                            {% if income.recurrence == 'monthly' %}bg-blue-50 text-blue-600
+                            {% elif income.recurrence == 'once' %}bg-gray-50 text-gray-500
+                            {% else %}bg-purple-50 text-purple-600{% endif %}">
+                            {{ income.get_recurrence_display }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <p class="text-sm font-bold text-green-600">
+                            +${{ income.amount|floatformat:0 }}
+                        </p>
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex items-center justify-center gap-2">
+                            <a href="{% url 'income_edit' income.id %}"
+                               class="text-indigo-600 hover:text-indigo-800 text-sm">
+                                ✏️
+                            </a>
+                            <form method="POST" action="{% url 'income_delete' income.id %}"
+                                  onsubmit="return confirm('¿Eliminar este ingreso?')">
+                                {% csrf_token %}
+                                <button type="submit" class="text-red-500 hover:text-red-700">
+                                    🗑️
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="py-16 text-center">
+                        <div class="text-gray-400">
+                            <p class="text-5xl mb-3">💵</p>
+                            <p class="text-lg font-medium">No hay ingresos registrados</p>
+                            <p class="text-sm mt-1">Comienza registrando tu primer ingreso</p>
+                            <a href="{% url 'income_create' %}"
+                               class="inline-block mt-4 btn-primary">
+                                + Registrar ingreso
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Editar Meta - FinanceIQ{% endblock %}
+{% block page_title %}Editar Meta{% endblock %}
+{% block page_subtitle %}Actualiza tu objetivo financiero{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Nombre de la meta *
+                </label>
+                <input type="text" name="name" required
+                    value="{{ goal.name }}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    Tipo de meta *
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {% for value, label in goal_types %}
+                    <label class="flex flex-col items-center gap-2 p-4 border-2 border-gray-200
+                                  rounded-xl cursor-pointer hover:border-indigo-400 transition-colors
+                                  has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                        <input type="radio" name="goal_type" value="{{ value }}"
+                            {% if goal.goal_type == value %}checked{% endif %}
+                            class="sr-only">
+                        <span class="text-3xl">
+                            {% if value == 'savings' %}🏦
+                            {% elif value == 'debt_payment' %}💳
+                            {% elif value == 'investment' %}📈
+                            {% elif value == 'emergency_fund' %}🛡️
+                            {% elif value == 'purchase' %}🛍️
+                            {% else %}🎯{% endif %}
+                        </span>
+                        <span class="text-xs font-medium text-gray-700 text-center">
+                            {{ label }}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Monto objetivo *
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                    <input type="number" name="target_amount" required
+                        value="{{ goal.target_amount }}"
+                        min="1" step="0.01"
+                        class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl
+                               focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Fecha objetivo *
+                </label>
+                <input type="date" name="target_date" required
+                    value="{{ goal.target_date|date:'Y-m-d' }}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                                                      focus:ring-2 focus:ring-indigo-500 outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Estado
+                </label>
+                <select name="status"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
+                    {% for value, label in status_choices %}
+                    <option value="{{ value }}"
+                        {% if goal.status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Descripción <span class="text-gray-400 font-normal">(opcional)</span>
+                </label>
+                <textarea name="description" rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
+                           focus:ring-2 focus:ring-indigo-500 outline-none transition resize-none"
+                    placeholder="¿Por qué es importante esta meta?">{{ goal.description }}</textarea>
+            </div>
+
+            <!-- Progreso actual -->
+            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+                <p class="text-sm font-semibold text-indigo-800 mb-3">
+                    📊 Progreso actual
+                </p>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm text-indigo-600">
+                        ${{ goal.current_amount|floatformat:0 }} acumulados
+                    </span>
+                    <span class="text-sm font-bold text-indigo-800">
+                        {{ goal.progress_percentage|floatformat:1 }}%
+                    </span>
+                </div>
+                <div class="w-full bg-indigo-200 rounded-full h-2">
+                    <div class="bg-indigo-600 h-2 rounded-full"
+                         style="width: {{ goal.progress_percentage|floatformat:0 }}%">
+                    </div>
+                </div>
+                <p class="text-xs text-indigo-500 mt-2">
+                    Faltan ${{ goal.remaining_amount|floatformat:0 }} para completar la meta
+                </p>
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn-primary flex-1 py-3">
+                    💾 Guardar Cambios
+                </button>
+                <a href="{% url 'goal_list' %}"
+                   class="btn-secondary flex-1 py-3 text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

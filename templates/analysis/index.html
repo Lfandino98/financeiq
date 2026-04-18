@@ -1,0 +1,402 @@
+{% extends 'base.html' %}
+{% block title %}Análisis Financiero - FinanceIQ{% endblock %}
+{% block page_title %}Análisis Inteligente{% endblock %}
+{% block page_subtitle %}Motor de análisis financiero avanzado{% endblock %}
+
+{% block content %}
+{% with summary=analysis.summary health=analysis.health %}
+
+<!-- Health Score Banner -->
+<div class="rounded-2xl p-6 mb-8 text-white
+    {% if health.status == 'healthy' %}bg-gradient-to-r from-green-500 to-emerald-600
+    {% elif health.status == 'stable' %}bg-gradient-to-r from-yellow-500 to-orange-500
+    {% else %}bg-gradient-to-r from-red-500 to-rose-600{% endif %}">
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-white/80 text-sm font-medium mb-1">Score de Salud Financiera</p>
+            <p class="text-5xl font-bold">{{ health.score }}/100</p>
+            <p class="text-xl font-semibold mt-1">{{ health.icon }} {{ health.label }}</p>
+            <p class="text-white/80 text-sm mt-2">{{ health.description }}</p>
+        </div>
+        <div class="text-right">
+            <div class="text-6xl opacity-30">💰</div>
+        </div>
+    </div>
+
+    <!-- Factores -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+        {% for factor in health.factors %}
+        <div class="bg-white/20 rounded-xl p-3">
+            <p class="text-xs font-semibold text-white/90">{{ factor.name }}</p>
+            <p class="text-xs text-white/70 mt-1">{{ factor.message }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Métricas Clave -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    <div class="card text-center">
+        <p class="text-xs text-gray-400 mb-1">Tasa de Ahorro</p>
+        <p class="text-3xl font-bold
+                        {% if summary.savings_rate >= 20 %}text-green-600
+            {% elif summary.savings_rate >= 10 %}text-yellow-500
+            {% else %}text-red-600{% endif %}">
+            {{ summary.savings_rate|floatformat:1 }}%
+        </p>
+        <p class="text-xs text-gray-400 mt-1">Meta: 20%</p>
+    </div>
+
+    <div class="card text-center">
+        <p class="text-xs text-gray-400 mb-1">Ratio Gasto/Ingreso</p>
+        <p class="text-3xl font-bold
+            {% if summary.expense_ratio <= 70 %}text-green-600
+            {% elif summary.expense_ratio <= 90 %}text-yellow-500
+            {% else %}text-red-600{% endif %}">
+            {{ summary.expense_ratio|floatformat:1 }}%
+        </p>
+        <p class="text-xs text-gray-400 mt-1">Ideal: menos del 80%</p>
+    </div>
+
+    <div class="card text-center">
+        <p class="text-xs text-gray-400 mb-1">Gasto Diario Promedio</p>
+        <p class="text-3xl font-bold text-gray-800">
+            ${{ summary.daily_avg_expense|floatformat:0 }}
+        </p>
+        <p class="text-xs text-gray-400 mt-1">Por día</p>
+    </div>
+
+    <div class="card text-center">
+        <p class="text-xs text-gray-400 mb-1">Transacciones</p>
+        <p class="text-3xl font-bold text-indigo-600">
+            {{ summary.transactions_count }}
+        </p>
+        <p class="text-xs text-gray-400 mt-1">En el período</p>
+    </div>
+</div>
+
+<!-- Análisis por Categorías -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+    <!-- Tabla de categorías -->
+    <div class="card">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">
+            📊 Distribución por Categorías
+        </h3>
+        <div class="space-y-3">
+            {% for cat_name, cat_data in analysis.categories.items %}
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-sm font-medium text-gray-700">
+                        {{ cat_name }}
+                    </span>
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-gray-400">
+                            ${{ cat_data.total|floatformat:0 }}
+                        </span>
+                        <span class="text-sm font-bold text-gray-800 w-12 text-right">
+                            {{ cat_data.percentage|floatformat:1 }}%
+                        </span>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-2.5">
+                    <div class="h-2.5 rounded-full transition-all duration-700
+                        {% if cat_data.percentage > 30 %}bg-red-500
+                        {% elif cat_data.percentage > 20 %}bg-yellow-500
+                        {% else %}bg-indigo-500{% endif %}"
+                         style="width: {{ cat_data.percentage|floatformat:0 }}%">
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-gray-400 text-center py-8">
+                No hay datos de categorías disponibles
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Gráfica de categorías -->
+    <div class="card">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">
+            🥧 Gráfica de Gastos
+        </h3>
+        <div class="relative h-72">
+            <canvas id="analysisCategoryChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Proyecciones -->
+<div class="card mb-8">
+    <h3 class="text-lg font-bold text-gray-800 mb-6">
+        🔮 Proyecciones Financieras
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for key, projection in analysis.projections.items %}
+        <div class="bg-gray-50 rounded-2xl p-5">
+            <p class="text-sm font-semibold text-gray-500 mb-3">
+                📅 {{ projection.label }}
+            </p>
+
+            <!-- Escenarios -->
+            <div class="space-y-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-green-600 font-medium">🟢 Optimista</span>
+                    <span class="text-sm font-bold text-green-600">
+                        ${{ projection.scenarios.optimistic|floatformat:0 }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-indigo-600 font-medium">🔵 Base</span>
+                    <span class="text-sm font-bold text-indigo-600">
+                        ${{ projection.scenarios.base|floatformat:0 }}
+                    </span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-red-500 font-medium">🔴 Pesimista</span>
+                    <span class="text-sm font-bold text-red-500">
+                        ${{ projection.scenarios.pessimistic|floatformat:0 }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 mt-3 pt-3">
+                <p class="text-xs text-gray-400">Ahorro mensual neto</p>
+                <p class="text-base font-bold
+                    {% if projection.monthly_net >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                    ${{ projection.monthly_net|floatformat:0 }}/mes
+                </p>
+            </div>
+
+            <p class="text-xs text-gray-400 mt-2">
+                📆 Hasta {{ projection.end_date }}
+            </p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Tendencia -->
+{% with trend=analysis.trend %}
+{% if trend.trend != 'insufficient_data' %}
+<div class="card mb-8">
+    <h3 class="text-lg font-bold text-gray-800 mb-4">📈 Análisis de Tendencia</h3>
+    <div class="flex items-center gap-4 mb-4">
+        <span class="text-3xl">
+            {% if trend.trend == 'improving' %}📈
+            {% elif trend.trend == 'deteriorating' %}📉
+            {% else %}➡️{% endif %}
+        </span>
+        <div>
+            <p class="font-bold text-gray-800">{{ trend.label }}</p>
+            <p class="text-sm text-gray-500">{{ trend.message }}</p>
+        </div>
+    </div>
+    <div class="grid grid-cols-3 gap-4">
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <p class="text-xs text-gray-400 mb-1">Tendencia Ingresos</p>
+            <p class="text-xl font-bold
+                {% if trend.income_trend >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                {% if trend.income_trend >= 0 %}+{% endif %}{{ trend.income_trend|floatformat:1 }}%
+            </p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <p class="text-xs text-gray-400 mb-1">Tendencia Gastos</p>
+            <p class="text-xl font-bold
+                {% if trend.expense_trend <= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                {% if trend.expense_trend >= 0 %}+{% endif %}{{ trend.expense_trend|floatformat:1 }}%
+            </p>
+        </div>
+        <div class="bg-gray-50 rounded-xl p-4 text-center">
+            <p class="text-xs text-gray-400 mb-1">Tendencia Ahorro</p>
+            <p class="text-xl font-bold
+                {% if trend.savings_trend >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                {% if trend.savings_trend >= 0 %}+{% endif %}{{ trend.savings_trend|floatformat:1 }}%
+            </p>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- Anomalías -->
+{% if analysis.anomalies %}
+<div class="card mb-8">
+    <h3 class="text-lg font-bold text-gray-800 mb-4">
+        🔍 Gastos Inusuales Detectados
+    </h3>
+    <div class="space-y-3">
+        {% for anomaly in analysis.anomalies %}
+        <div class="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-xl">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">⚠️</span>
+                <div>
+                    <p class="text-sm font-semibold text-gray-800">
+                        {{ anomaly.description }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ anomaly.category }} · {{ anomaly.date }}
+                    </p>
+                </div>
+            </div>
+            <div class="text-right">
+                <p class="text-sm font-bold text-orange-600">
+                    ${{ anomaly.amount|floatformat:0 }}
+                </p>
+                <p class="text-xs text-orange-400">
+                    +{{ anomaly.excess_percentage|floatformat:0 }}% del promedio
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Recomendaciones Completas -->
+<div class="card mb-8">
+    <h3 class="text-lg font-bold text-gray-800 mb-4">
+        🧠 Recomendaciones Personalizadas
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for rec in analysis.recommendations %}
+        <div class="p-4 rounded-xl border
+            {% if rec.type == 'danger' %}bg-red-50 border-red-200
+            {% elif rec.type == 'warning' %}bg-yellow-50 border-yellow-200
+            {% elif rec.type == 'success' %}bg-green-50 border-green-200
+            {% else %}bg-blue-50 border-blue-200{% endif %}">
+            <div class="flex items-start gap-3">
+                <span class="text-xl mt-0.5">
+                    {% if rec.type == 'danger' %}🚨
+                    {% elif rec.type == 'warning' %}⚠️
+                    {% elif rec.type == 'success' %}✅
+                    {% else %}💡{% endif %}
+                </span>
+                <div class="flex-1">
+                    <p class="font-semibold text-sm text-gray-800">{{ rec.title }}</p>
+                    <p class="text-xs text-gray-600 mt-1">{{ rec.description }}</p>
+                    <div class="mt-2 pt-2 border-t border-current border-opacity-20">
+                        <p class="text-xs font-medium
+                            {% if rec.type == 'danger' %}text-red-600
+                            {% elif rec.type == 'warning' %}text-yellow-600
+                            {% elif rec.type == 'success' %}text-green-600
+                            {% else %}text-blue-600{% endif %}">
+                            🎯 {{ rec.action }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-2 text-center py-8 text-gray-400">
+            <p class="text-4xl mb-2">🎉</p>
+            <p class="font-medium">¡Sin recomendaciones! Tus finanzas están en excelente estado.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Análisis de Metas -->
+{% if analysis.goals_analysis %}
+<div class="card">
+    <h3 class="text-lg font-bold text-gray-800 mb-4">
+        🎯 Estado de Metas Financieras
+    </h3>
+    <div class="space-y-4">
+        {% for goal in analysis.goals_analysis %}
+        <div class="p-4 border border-gray-200 rounded-xl">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="font-semibold text-gray-800">{{ goal.name }}</p>
+                    <p class="text-xs text-gray-400">
+                        {{ goal.days_remaining }} días restantes ·
+                        ${{ goal.remaining_amount|floatformat:0 }} pendientes
+                    </p>
+                </div>
+                <span class="text-2xl font-bold text-indigo-600">
+                    {{ goal.progress_percentage|floatformat:1 }}%
+                </span>
+            </div>
+
+            <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                <div class="h-2 rounded-full bg-indigo-500 transition-all"
+                     style="width: {{ goal.progress_percentage|floatformat:0 }}%">
+                </div>
+            </div>
+
+            {% if goal.projection.achievable %}
+            <p class="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+                ✅ {{ goal.projection.message }}
+            </p>
+            {% else %}
+            <p class="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">
+                ⚠️ {{ goal.projection.message }}
+            </p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('{% url "ajax_dashboard_data" %}?period={{ period }}')
+        .then(r => r.json())
+        .then(data => {
+            if (data.categories) renderAnalysisCategoryChart(data.categories);
+        });
+});
+
+function renderAnalysisCategoryChart(data) {
+    const ctx = document.getElementById('analysisCategoryChart');
+    if (!ctx || !data.labels.length) return;
+
+        const colors = [
+        '#6366f1','#f59e0b','#10b981','#ef4444',
+        '#3b82f6','#8b5cf6','#ec4899','#14b8a6',
+        '#f97316','#64748b'
+    ];
+
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                data: data.values,
+                backgroundColor: colors.slice(0, data.labels.length),
+                borderWidth: 3,
+                borderColor: '#ffffff',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 11 },
+                        padding: 12,
+                        usePointStyle: true,
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            const total = data.totals[ctx.dataIndex];
+                            return ` ${ctx.label}: ${ctx.parsed.toFixed(1)}% ($${total.toLocaleString()})`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

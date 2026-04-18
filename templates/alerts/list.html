@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}Alertas - FinanceIQ{% endblock %}
+{% block page_title %}Centro de Alertas{% endblock %}
+{% block page_subtitle %}Notificaciones y alertas de tu salud financiera{% endblock %}
+
+{% block content %}
+
+<!-- Resumen de alertas -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    {% for type, label, color, icon in alert_type_summary %}
+    <div class="card text-center">
+        <span class="text-3xl">{{ icon }}</span>
+        <p class="text-2xl font-bold mt-2 {{ color }}">{{ label }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Lista de alertas -->
+<div class="space-y-4">
+    {% for alert in alerts %}
+    <div class="card flex items-start gap-4
+        {% if not alert.is_read %}border-l-4
+            {% if alert.alert_type == 'danger' %}border-red-500
+            {% elif alert.alert_type == 'warning' %}border-yellow-500
+            {% elif alert.alert_type == 'success' %}border-green-500
+            {% else %}border-blue-500{% endif %}
+        {% endif %}">
+
+        <!-- Icono -->
+        <div class="text-3xl flex-shrink-0">
+            {% if alert.alert_type == 'danger' %}🚨
+            {% elif alert.alert_type == 'warning' %}⚠️
+            {% elif alert.alert_type == 'success' %}✅
+            {% else %}ℹ️{% endif %}
+        </div>
+
+        <!-- Contenido -->
+        <div class="flex-1">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="font-semibold text-gray-800">{{ alert.title }}</p>
+                    <p class="text-sm text-gray-600 mt-1">{{ alert.message }}</p>
+                    <p class="text-xs text-gray-400 mt-2">
+                        🕐 {{ alert.created_at|date:"d M Y, H:i" }}
+                        {% if not alert.is_read %}
+                        <span class="ml-2 bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                            Nueva
+                        </span>
+                        {% endif %}
+                    </p>
+                </div>
+
+                <!-- Descartar -->
+                <button
+                    onclick="dismissAlert('{{ alert.id }}', this)"
+                    class="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors p-1 rounded-lg hover:bg-red-50"
+                    title="Descartar alerta">
+                    ✕
+                </button>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card text-center py-16">
+        <p class="text-6xl mb-4">🔔</p>
+        <p class="text-xl font-bold text-gray-700">No hay alertas</p>
+        <p class="text-gray-400 mt-2">
+            Las alertas aparecerán aquí cuando el sistema detecte
+            situaciones importantes en tus finanzas.
+        </p>
+        <a href="{% url 'dashboard' %}" class="inline-block mt-6 btn-primary px-8 py-3">
+            Ir al Dashboard
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function dismissAlert(alertId, btn) {
+    fetch(`/alertas/${alertId}/descartar/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            const card = btn.closest('.card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateX(100%)';
+            card.style.transition = 'all 0.3s ease';
+            setTimeout(() => card.remove(), 300);
+        }
+    })
+    .catch(err => console.error('Error descartando alerta:', err));
+}
+</script>
+{% endblock %}

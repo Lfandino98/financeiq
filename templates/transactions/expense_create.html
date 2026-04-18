@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Nuevo Gasto - FinanceIQ{% endblock %}
+{% block page_title %}Registrar Gasto{% endblock %}
+{% block page_subtitle %}Agrega un nuevo gasto a tu registro{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card">
+        <form method="POST" class="space-y-6" id="expenseForm">
+            {% csrf_token %}
+
+            <!-- Descripción con clasificación automática -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Descripción *
+                </label>
+                <input
+                    type="text"
+                    name="description"
+                    id="description"
+                    required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                    placeholder="Ej: Pizza Domino's, Uber al trabajo..."
+                >
+                <!-- Sugerencia de categoría -->
+                <div id="categoryHint" class="mt-2 hidden">
+                    <p class="text-xs text-indigo-600 bg-indigo-50 px-3 py-2 rounded-lg">
+                        🤖 Categoría sugerida: <strong id="suggestedCat"></strong>
+                        <span id="confidenceText" class="text-gray-400"></span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Monto -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Monto *
+                </label>
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                    <input
+                        type="number"
+                        name="amount"
+                        required
+                        min="0.01"
+                        step="0.01"
+                        class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                        placeholder="0.00"
+                    >
+                </div>
+            </div>
+
+            <!-- Fecha -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Fecha *
+                </label>
+                <input
+                    type="date"
+                    name="date"
+                    required
+                    value="{{ today }}"
+                    max="{{ today }}"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                >
+            </div>
+
+            <!-- Categoría -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Categoría
+                    <span class="text-gray-400 font-normal">(opcional - se auto-clasifica)</span>
+                </label>
+                <select
+                    name="category"
+                    id="categorySelect"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition"
+                >
+                    <option value="">🤖 Clasificar automáticamente</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}">
+                        {{ cat.icon }} {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Opciones -->
+            <div class="grid grid-cols-2 gap-4">
+                <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" name="is_essential" checked
+                        class="w-4 h-4 text-indigo-600 rounded">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Gasto esencial</p>
+                        <p class="text-xs text-gray-400">Necesario para vivir</p>
+                    </div>
+                </label>
+
+                <label class="flex items-center gap-3 p-4 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" name="is_recurring"
+                        class="w-4 h-4 text-indigo-600 rounded">
+                    <div>
+                        <p class="text-sm font-medium text-gray-700">Recurrente</p>
+                        <p class="text-xs text-gray-400">Se repite periódicamente</p>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Notas -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    Notas <span class="text-gray-400 font-normal">(opcional)</span>
+                </label>
+                <textarea
+                    name="notes"
+                    rows="3"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition resize-none"
+                    placeholder="Información adicional sobre este gasto..."
+                ></textarea>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-3 pt-2">
+                <button type="submit" class="btn-primary flex-1 py-3">
+                    💾 Guardar Gasto
+                </button>
+                                <a href="{% url 'expense_list' %}" class="btn-secondary flex-1 py-3 text-center">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Clasificación automática al escribir descripción
+let classifyTimeout;
+const descriptionInput = document.getElementById('description');
+const categoryHint = document.getElementById('categoryHint');
+const suggestedCat = document.getElementById('suggestedCat');
+const confidenceText = document.getElementById('confidenceText');
+const categorySelect = document.getElementById('categorySelect');
+
+descriptionInput.addEventListener('input', function() {
+    clearTimeout(classifyTimeout);
+    const description = this.value.trim();
+
+    if (description.length < 3) {
+        categoryHint.classList.add('hidden');
+        return;
+    }
+
+    classifyTimeout = setTimeout(() => {
+        fetch(`{% url 'ajax_classify' %}?description=${encodeURIComponent(description)}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.category_name && data.confidence > 0.2) {
+                    suggestedCat.textContent = `${data.category_icon} ${data.category_name}`;
+                    confidenceText.textContent = ` (${Math.round(data.confidence * 100)}% confianza)`;
+                    categoryHint.classList.remove('hidden');
+
+                    // Auto-seleccionar si no hay categoría seleccionada
+                    if (!categorySelect.value && data.category_id) {
+                        const option = categorySelect.querySelector(
+                            `option[value="${data.category_id}"]`
+                        );
+                        if (option) option.selected = true;
+                    }
+                } else {
+                    categoryHint.classList.add('hidden');
+                }
+            })
+            .catch(() => categoryHint.classList.add('hidden'));
+    }, 500);
+});
+</script>
+{% endblock %}

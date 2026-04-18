@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FinanceIQ{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .sidebar-link.active { @apply bg-indigo-700 text-white; }
+        .card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6; }
+        .btn-primary { @apply bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200; }
+        .btn-danger { @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200; }
+        .btn-secondary { @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200; }
+    </style>
+</head>
+<body class="h-full bg-gray-50 font-sans">
+
+{% if user.is_authenticated %}
+<div class="flex h-full">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-indigo-800 text-white flex flex-col fixed h-full z-10">
+        <!-- Logo -->
+        <div class="p-6 border-b border-indigo-700">
+            <h1 class="text-2xl font-bold text-white">💰 FinanceIQ</h1>
+            <p class="text-indigo-300 text-sm mt-1">
+                Hola, {{ user.first_name|default:user.username }}
+            </p>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <a href="{% url 'dashboard' %}"
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'dashboard' %}active{% endif %}">
+                <span class="text-xl">📊</span>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="{% url 'income_list' %}"
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'incomes' %}active{% endif               %}">
+                <span class="text-xl">💵</span>
+                <span class="font-medium">Ingresos</span>
+            </a>
+            <a href="{% url 'expense_list' %}"
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'expenses' %}active{% endif %}">
+                <span class="text-xl">💸</span>
+                <span class="font-medium">Gastos</span>
+            </a>
+            <a href="{% url 'goal_list' %}"
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'goals' %}active{% endif %}">
+                <span class="text-xl">🎯</span>
+                <span class="font-medium">Metas</span>
+            </a>
+            <a href="{% url 'analysis' %}"
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'analysis' %}active{% endif %}">
+                <span class="text-xl">🧠</span>
+                <span class="font-medium">Análisis</span>
+            </a>
+            <a href="{% url 'category_list' %}"
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'categories' %}active{% endif %}">
+                <span class="text-xl">🏷️</span>
+                <span class="font-medium">Categorías</span>
+            </a>
+            <a href="{% url 'alerts' %}"
+               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'alerts' %}active{% endif %}">
+                <span class="text-xl">🔔</span>
+                <span class="font-medium">Alertas</span>
+                {% if unread_alerts_count %}
+                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {{ unread_alerts_count }}
+                </span>
+                {% endif %}
+            </a>
+        </nav>
+
+        <!-- User section -->
+        <div class="p-4 border-t border-indigo-700">
+            <a href="{% url 'logout' %}"
+               class="flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-200 hover:bg-indigo-700 transition-colors w-full">
+                <span class="text-xl">🚪</span>
+                <span class="font-medium">Cerrar sesión</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="flex-1 ml-64 min-h-full">
+        <!-- Top bar -->
+        <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+            <div>
+                <h2 class="text-xl font-bold text-gray-800">
+                    {% block page_title %}Dashboard{% endblock %}
+                </h2>
+                <p class="text-sm text-gray-500">
+                    {% block page_subtitle %}{% endblock %}
+                </p>
+            </div>
+            <div class="flex items-center gap-4">
+                {% block header_actions %}{% endblock %}
+                <span class="text-sm text-gray-500">
+                    {{ today|date:"d M Y" }}
+                </span>
+            </div>
+        </header>
+
+        <!-- Messages -->
+        {% if messages %}
+        <div class="px-8 pt-4">
+            {% for message in messages %}
+            <div class="mb-3 p-4 rounded-xl flex items-center gap-3
+                {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700
+                {% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700
+                {% elif message.tags == 'warning' %}bg-yellow-50 border border-yellow-200 text-yellow-700
+                {% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
+                <span>
+                    {% if message.tags == 'error' %}❌
+                    {% elif message.tags == 'success' %}✅
+                    {% elif message.tags == 'warning' %}⚠️
+                    {% else %}ℹ️{% endif %}
+                </span>
+                <span class="font-medium">{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Page content -->
+        <div class="p-8">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</div>
+
+{% else %}
+<!-- Unauthenticated layout -->
+<div class="min-h-full">
+    {% block auth_content %}{% endblock %}
+</div>
+{% endif %}
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>
