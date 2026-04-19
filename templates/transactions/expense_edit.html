@@ -5,116 +5,111 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-    <div class="card">
-        <form method="POST" class="space-y-6">
-            {% csrf_token %}
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Descripción *
-                </label>
-                <input type="text" name="description" required
-                    value="{{ expense.description }}"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
-                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Monto *
-                </label>
-                <div class="relative">
-                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                    <input type="number" name="amount" required
-                                                value="{{ expense.amount }}"
-                        min="0.01" step="0.01"
-                        class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl
-                               focus:ring-2 focus:ring-indigo-500 outline-none transition">
+    <div class="glass-card p-8 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/4 to-transparent rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <div class="flex items-center gap-3 mb-8 pb-6 border-b border-white/5">
+                <div class="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-2xl">✏️</div>
+                <div>
+                    <h3 class="text-lg font-semibold text-white">Editar Gasto</h3>
+                    <p class="text-xs text-slate-500">Actualiza los detalles del gasto</p>
                 </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Fecha *
-                </label>
-                <input type="date" name="date" required
-                    value="{{ expense.date|date:'Y-m-d' }}"
-                    max="{{ today }}"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
-                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
-            </div>
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
 
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Categoría
-                </label>
-                <select name="category"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
-                           focus:ring-2 focus:ring-indigo-500 outline-none transition">
-                    <option value="">Sin categoría</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat.id }}"
-                        {% if expense.category and expense.category.id == cat.id %}selected{% endif %}>
-                        {{ cat.icon }} {{ cat.name }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Descripción *</label>
+                    <input type="text" name="description" required value="{{ expense.description }}"
+                        class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-sm outline-none transition-all duration-300 focus:border-rose-500/40 focus:bg-white/8 focus:shadow-[0_0_0_3px_rgba(244,63,94,0.08)]">
+                </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <label class="flex items-center gap-3 p-4 border border-gray-200
-                              rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" name="is_essential"
-                        {% if expense.is_essential %}checked{% endif %}
-                        class="w-4 h-4 text-indigo-600 rounded">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Gasto esencial</p>
-                        <p class="text-xs text-gray-400">Necesario para vivir</p>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Monto *</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-rose-400 font-semibold text-lg">$</span>
+                        <input type="number" name="amount" required value="{{ expense.amount }}"
+                            min="0.01" step="0.01"
+                            class="w-full pl-9 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-sm outline-none transition-all duration-300 focus:border-rose-500/40 focus:bg-white/8 focus:shadow-[0_0_0_3px_rgba(244,63,94,0.08)]">
                     </div>
-                </label>
+                </div>
 
-                <label class="flex items-center gap-3 p-4 border border-gray-200
-                              rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" name="is_recurring"
-                        {% if expense.is_recurring %}checked{% endif %}
-                        class="w-4 h-4 text-indigo-600 rounded">
-                    <div>
-                        <p class="text-sm font-medium text-gray-700">Recurrente</p>
-                        <p class="text-xs text-gray-400">Se repite periódicamente</p>
-                    </div>
-                </label>
-            </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Fecha *</label>
+                    <input type="date" name="date" required value="{{ expense.date|date:'Y-m-d' }}"
+                        max="{{ today }}"
+                        class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-slate-200 text-sm outline-none transition-all duration-300 focus:border-rose-500/40 focus:bg-white/8 focus:shadow-[0_0_0_3px_rgba(244,63,94,0.08)]">
+                </div>
 
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    Notas <span class="text-gray-400 font-normal">(opcional)</span>
-                </label>
-                <textarea name="notes" rows="3"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-xl
-                           focus:ring-2 focus:ring-indigo-500 outline-none transition resize-none"
-                    placeholder="Información adicional...">{{ expense.notes|default:'' }}</textarea>
-            </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Categoría</label>
+                    <select name="category"
+                        class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-slate-200 text-sm outline-none transition-all duration-300 focus:border-rose-500/40 cursor-pointer">
+                        <option value="">Sin categoría</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}"
+                            {% if expense.category and expense.category.id == cat.id %}selected{% endif %}>
+                            {{ cat.icon }} {{ cat.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <!-- Info de clasificación automática -->
-            {% if expense.auto_classified %}
-            <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
-                <p class="text-sm text-indigo-700">
-                    🤖 Este gasto fue <strong>clasificado automáticamente</strong>.
-                    Puedes cambiar la categoría si no es correcta.
-                </p>
-            </div>
-            {% endif %}
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl cursor-pointer hover:border-blue-500/30 hover:bg-blue-500/5 transition-all duration-300 group">
+                        <input type="checkbox" name="is_essential"
+                            {% if expense.is_essential %}checked{% endif %}
+                            class="w-4 h-4 rounded accent-emerald-500">
+                        <div>
+                            <p class="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Gasto esencial</p>
+                            <p class="text-xs text-slate-500">Necesario para vivir</p>
+                        </div>
+                    </label>
 
-            <div class="flex gap-3 pt-2">
-                <button type="submit" class="btn-primary flex-1 py-3">
-                    💾 Guardar Cambios
-                </button>
-                <a href="{% url 'expense_list' %}"
-                   class="btn-secondary flex-1 py-3 text-center">
-                    Cancelar
-                </a>
-            </div>
-        </form>
+                    <label class="flex items-center gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl cursor-pointer hover:border-purple-500/30 hover:bg-purple-500/5 transition-all duration-300 group">
+                        <input type="checkbox" name="is_recurring"
+                            {% if expense.is_recurring %}checked{% endif %}
+                            class="w-4 h-4 rounded accent-emerald-500">
+                        <div>
+                            <p class="text-sm font-medium text-slate-300 group-hover:text-white transition-colors">Recurrente</p>
+                            <p class="text-xs text-slate-500">Se repite periódicamente</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">
+                        Notas <span class="text-slate-600 font-normal normal-case">(opcional)</span>
+                    </label>
+                    <textarea name="notes" rows="3"
+                        class="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 text-sm outline-none transition-all duration-300 focus:border-rose-500/40 focus:bg-white/8 focus:shadow-[0_0_0_3px_rgba(244,63,94,0.08)] resize-none"
+                        placeholder="Información adicional...">{{ expense.notes|default:'' }}</textarea>
+                </div>
+
+                <!-- Info de clasificación automática -->
+                {% if expense.auto_classified %}
+                <div class="flex items-center gap-3 p-4 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl">
+                    <span class="text-xl flex-shrink-0">🤖</span>
+                    <p class="text-sm text-indigo-300">
+                        Este gasto fue <strong class="text-indigo-200">clasificado automáticamente</strong>.
+                        Puedes cambiar la categoría si no es correcta.
+                    </p>
+                </div>
+                {% endif %}
+
+                <div class="flex gap-3 pt-4 border-t border-white/5">
+                    <button type="submit"
+                        class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold rounded-xl py-3.5 px-5 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] transition-all duration-300 active:scale-95 text-sm">
+                        💾 Guardar Cambios
+                    </button>
+                    <a href="{% url 'expense_list' %}"
+                       class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-medium rounded-xl py-3.5 px-5 backdrop-blur-md transition-all duration-300 active:scale-95 text-sm text-center">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

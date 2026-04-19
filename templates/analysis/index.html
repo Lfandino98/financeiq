@@ -6,29 +6,52 @@
 {% block content %}
 {% with summary=analysis.summary health=analysis.health %}
 
-<!-- Health Score Banner -->
-<div class="rounded-2xl p-6 mb-8 text-white
-    {% if health.status == 'healthy' %}bg-gradient-to-r from-green-500 to-emerald-600
-    {% elif health.status == 'stable' %}bg-gradient-to-r from-yellow-500 to-orange-500
-    {% else %}bg-gradient-to-r from-red-500 to-rose-600{% endif %}">
-    <div class="flex items-center justify-between">
+<!-- Health Score Banner (Glass premium) -->
+<div class="glass-card p-8 mb-8 overflow-hidden opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] relative">
+
+    <!-- Orbe de fondo decorativo -->
+    <div class="absolute -top-16 -right-16 w-64 h-64 rounded-full blur-3xl pointer-events-none
+        {% if health.status == 'healthy' %}bg-emerald-500/15
+        {% elif health.status == 'stable' %}bg-amber-500/15
+        {% else %}bg-rose-500/15{% endif %}">
+    </div>
+
+    <div class="relative flex items-center justify-between flex-wrap gap-6">
         <div>
-            <p class="text-white/80 text-sm font-medium mb-1">Score de Salud Financiera</p>
-            <p class="text-5xl font-bold">{{ health.score }}/100</p>
-            <p class="text-xl font-semibold mt-1">{{ health.icon }} {{ health.label }}</p>
-            <p class="text-white/80 text-sm mt-2">{{ health.description }}</p>
+            <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">Score de Salud Financiera</p>
+            <div class="flex items-baseline gap-3 mb-2">
+                <p class="text-6xl font-light text-white tracking-tight">{{ health.score }}</p>
+                <span class="text-2xl text-slate-500 font-light">/100</span>
+            </div>
+            <p class="text-xl font-semibold
+                {% if health.status == 'healthy' %}text-emerald-400
+                {% elif health.status == 'stable' %}text-amber-400
+                {% else %}text-rose-400{% endif %}">
+                {{ health.icon }} {{ health.label }}
+            </p>
+            <p class="text-sm text-slate-400 mt-2 max-w-md leading-relaxed">{{ health.description }}</p>
         </div>
-        <div class="text-right">
-            <div class="text-6xl opacity-30">💰</div>
+        <div>
+            <!-- Score ring visual -->
+            <div class="w-24 h-24 rounded-full flex items-center justify-center border-4 relative
+                {% if health.status == 'healthy' %}border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.2)]
+                {% elif health.status == 'stable' %}border-amber-500/30 shadow-[0_0_30px_rgba(245,158,11,0.2)]
+                {% else %}border-rose-500/30 shadow-[0_0_30px_rgba(239,68,68,0.2)]{% endif %}">
+                <span class="text-4xl">
+                    {% if health.status == 'healthy' %}💚
+                    {% elif health.status == 'stable' %}💛
+                    {% else %}❤️{% endif %}
+                </span>
+            </div>
         </div>
     </div>
 
-    <!-- Factores -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+    <!-- Factores de salud -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mt-8 pt-6 border-t border-white/5">
         {% for factor in health.factors %}
-        <div class="bg-white/20 rounded-xl p-3">
-            <p class="text-xs font-semibold text-white/90">{{ factor.name }}</p>
-            <p class="text-xs text-white/70 mt-1">{{ factor.message }}</p>
+        <div class="bg-white/5 border border-white/8 rounded-2xl p-4">
+            <p class="text-xs font-semibold text-slate-200 mb-1">{{ factor.name }}</p>
+            <p class="text-xs text-slate-500 leading-relaxed">{{ factor.message }}</p>
         </div>
         {% endfor %}
     </div>
@@ -36,184 +59,217 @@
 
 <!-- Métricas Clave -->
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <div class="card text-center">
-        <p class="text-xs text-gray-400 mb-1">Tasa de Ahorro</p>
-        <p class="text-3xl font-bold
-                        {% if summary.savings_rate >= 20 %}text-green-600
-            {% elif summary.savings_rate >= 10 %}text-yellow-500
-            {% else %}text-red-600{% endif %}">
+
+    <div class="glass-card p-5 text-center opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-1 transition-all duration-500 hover:-translate-y-1 hover:border-emerald-500/30 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">Tasa de Ahorro</p>
+        <p class="text-4xl font-light tracking-tight
+            {% if summary.savings_rate >= 20 %}text-emerald-400
+            {% elif summary.savings_rate >= 10 %}text-amber-400
+            {% else %}text-rose-400{% endif %}">
             {{ summary.savings_rate|floatformat:1 }}%
         </p>
-        <p class="text-xs text-gray-400 mt-1">Meta: 20%</p>
+        <p class="text-xs text-slate-500 mt-2">Meta: 20%</p>
     </div>
 
-    <div class="card text-center">
-        <p class="text-xs text-gray-400 mb-1">Ratio Gasto/Ingreso</p>
-        <p class="text-3xl font-bold
-            {% if summary.expense_ratio <= 70 %}text-green-600
-            {% elif summary.expense_ratio <= 90 %}text-yellow-500
-            {% else %}text-red-600{% endif %}">
+    <div class="glass-card p-5 text-center opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-2 transition-all duration-500 hover:-translate-y-1 hover:border-rose-500/30 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">Ratio Gasto/Ingreso</p>
+        <p class="text-4xl font-light tracking-tight
+            {% if summary.expense_ratio <= 70 %}text-emerald-400
+            {% elif summary.expense_ratio <= 90 %}text-amber-400
+            {% else %}text-rose-400{% endif %}">
             {{ summary.expense_ratio|floatformat:1 }}%
         </p>
-        <p class="text-xs text-gray-400 mt-1">Ideal: menos del 80%</p>
+        <p class="text-xs text-slate-500 mt-2">Ideal: menos del 80%</p>
     </div>
 
-    <div class="card text-center">
-        <p class="text-xs text-gray-400 mb-1">Gasto Diario Promedio</p>
-        <p class="text-3xl font-bold text-gray-800">
+    <div class="glass-card p-5 text-center opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 transition-all duration-500 hover:-translate-y-1 hover:border-blue-500/30 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">Gasto Diario</p>
+        <p class="text-4xl font-light text-white tracking-tight">
             ${{ summary.daily_avg_expense|floatformat:0 }}
         </p>
-        <p class="text-xs text-gray-400 mt-1">Por día</p>
+        <p class="text-xs text-slate-500 mt-2">Promedio por día</p>
     </div>
 
-    <div class="card text-center">
-        <p class="text-xs text-gray-400 mb-1">Transacciones</p>
-        <p class="text-3xl font-bold text-indigo-600">
+    <div class="glass-card p-5 text-center opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-4 transition-all duration-500 hover:-translate-y-1 hover:border-indigo-500/30 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-3">Transacciones</p>
+        <p class="text-4xl font-light text-indigo-400 tracking-tight">
             {{ summary.transactions_count }}
         </p>
-        <p class="text-xs text-gray-400 mt-1">En el período</p>
+        <p class="text-xs text-slate-500 mt-2">En el período</p>
     </div>
 </div>
 
 <!-- Análisis por Categorías -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
 
     <!-- Tabla de categorías -->
-    <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">
-            📊 Distribución por Categorías
-        </h3>
-        <div class="space-y-3">
-            {% for cat_name, cat_data in analysis.categories.items %}
-            <div>
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-sm font-medium text-gray-700">
-                        {{ cat_name }}
-                    </span>
-                    <div class="flex items-center gap-3">
-                        <span class="text-xs text-gray-400">
-                            ${{ cat_data.total|floatformat:0 }}
-                        </span>
-                        <span class="text-sm font-bold text-gray-800 w-12 text-right">
-                            {{ cat_data.percentage|floatformat:1 }}%
-                        </span>
+    <div class="glass-card p-6 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-2 transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-slate-900/60 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-indigo-500/10 flex items-center justify-center text-sm">📊</span>
+                Distribución por Categorías
+            </h3>
+            <p class="text-xs text-slate-500 mb-5">Porcentaje de gasto por categoría</p>
+            <div class="space-y-4">
+                {% for cat_name, cat_data in analysis.categories.items %}
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm text-slate-300">{{ cat_name }}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-slate-500">
+                                ${{ cat_data.total|floatformat:0 }}
+                            </span>
+                            <span class="text-sm font-semibold text-white w-12 text-right">
+                                {{ cat_data.percentage|floatformat:1 }}%
+                            </span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-white/5 rounded-full h-1.5">
+                        <div class="h-1.5 rounded-full transition-all duration-700
+                            {% if cat_data.percentage > 30 %}bg-gradient-to-r from-rose-600 to-rose-400 shadow-[0_0_6px_rgba(239,68,68,0.4)]
+                            {% elif cat_data.percentage > 20 %}bg-gradient-to-r from-amber-600 to-amber-400 shadow-[0_0_6px_rgba(245,158,11,0.3)]
+                            {% else %}bg-gradient-to-r from-indigo-600 to-indigo-400 shadow-[0_0_6px_rgba(99,102,241,0.3)]{% endif %}"
+                             style="width: {{ cat_data.percentage|floatformat:0 }}%">
+                        </div>
                     </div>
                 </div>
-                <div class="w-full bg-gray-100 rounded-full h-2.5">
-                    <div class="h-2.5 rounded-full transition-all duration-700
-                        {% if cat_data.percentage > 30 %}bg-red-500
-                        {% elif cat_data.percentage > 20 %}bg-yellow-500
-                        {% else %}bg-indigo-500{% endif %}"
-                         style="width: {{ cat_data.percentage|floatformat:0 }}%">
-                    </div>
+                {% empty %}
+                <div class="text-center py-8">
+                    <p class="text-slate-500 text-sm">No hay datos de categorías disponibles</p>
                 </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <p class="text-gray-400 text-center py-8">
-                No hay datos de categorías disponibles
-            </p>
-            {% endfor %}
         </div>
     </div>
 
     <!-- Gráfica de categorías -->
-    <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">
-            🥧 Gráfica de Gastos
-        </h3>
-        <div class="relative h-72">
-            <canvas id="analysisCategoryChart"></canvas>
+    <div class="glass-card p-6 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-slate-900/60 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-purple-500/10 flex items-center justify-center text-sm">🥧</span>
+                Gráfica de Gastos
+            </h3>
+            <p class="text-xs text-slate-500 mb-5">Distribución visual</p>
+            <div class="relative h-72">
+                <canvas id="analysisCategoryChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Proyecciones -->
-<div class="card mb-8">
-    <h3 class="text-lg font-bold text-gray-800 mb-6">
-        🔮 Proyecciones Financieras
-    </h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {% for key, projection in analysis.projections.items %}
-        <div class="bg-gray-50 rounded-2xl p-5">
-            <p class="text-sm font-semibold text-gray-500 mb-3">
-                📅 {{ projection.label }}
-            </p>
+<div class="glass-card p-6 mb-8 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-2 transition-all duration-500 hover:-translate-y-1 hover:border-blue-500/20 hover:bg-slate-900/60 group">
+    <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+    <div class="relative">
+        <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-xl bg-blue-500/10 flex items-center justify-center text-sm">🔮</span>
+            Proyecciones Financieras
+        </h3>
+        <p class="text-xs text-slate-500 mb-6">Escenarios a futuro basados en tu historial</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {% for key, projection in analysis.projections.items %}
+            <div class="bg-white/5 border border-white/8 rounded-2xl p-5 hover:border-white/15 transition-all duration-300">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-4">
+                    📅 {{ projection.label }}
+                </p>
 
-            <!-- Escenarios -->
-            <div class="space-y-3">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs text-green-600 font-medium">🟢 Optimista</span>
-                    <span class="text-sm font-bold text-green-600">
-                        ${{ projection.scenarios.optimistic|floatformat:0 }}
-                    </span>
+                <!-- Escenarios -->
+                <div class="space-y-3 mb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_4px_rgba(16,185,129,0.6)]"></span>
+                            Optimista
+                        </span>
+                        <span class="text-sm font-semibold text-emerald-400">
+                            ${{ projection.scenarios.optimistic|floatformat:0 }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="flex items-center gap-1.5 text-xs font-medium text-blue-400">
+                            <span class="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_4px_rgba(59,130,246,0.6)]"></span>
+                            Base
+                        </span>
+                        <span class="text-sm font-semibold text-blue-400">
+                            ${{ projection.scenarios.base|floatformat:0 }}
+                        </span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="flex items-center gap-1.5 text-xs font-medium text-rose-400">
+                            <span class="w-2 h-2 rounded-full bg-rose-400 shadow-[0_0_4px_rgba(244,63,94,0.6)]"></span>
+                            Pesimista
+                        </span>
+                        <span class="text-sm font-semibold text-rose-400">
+                            ${{ projection.scenarios.pessimistic|floatformat:0 }}
+                        </span>
+                    </div>
                 </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-xs text-indigo-600 font-medium">🔵 Base</span>
-                    <span class="text-sm font-bold text-indigo-600">
-                        ${{ projection.scenarios.base|floatformat:0 }}
-                    </span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-xs text-red-500 font-medium">🔴 Pesimista</span>
-                    <span class="text-sm font-bold text-red-500">
-                        ${{ projection.scenarios.pessimistic|floatformat:0 }}
-                    </span>
-                </div>
-            </div>
 
-            <div class="border-t border-gray-200 mt-3 pt-3">
-                <p class="text-xs text-gray-400">Ahorro mensual neto</p>
-                <p class="text-base font-bold
-                    {% if projection.monthly_net >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                    ${{ projection.monthly_net|floatformat:0 }}/mes
+                <div class="border-t border-white/5 pt-3">
+                    <p class="text-xs text-slate-500">Ahorro mensual neto</p>
+                    <p class="text-lg font-light
+                        {% if projection.monthly_net >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                        ${{ projection.monthly_net|floatformat:0 }}/mes
+                    </p>
+                </div>
+
+                <p class="text-xs text-slate-600 mt-2">
+                    📆 Hasta {{ projection.end_date }}
                 </p>
             </div>
-
-            <p class="text-xs text-gray-400 mt-2">
-                📆 Hasta {{ projection.end_date }}
-            </p>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
 
 <!-- Tendencia -->
 {% with trend=analysis.trend %}
 {% if trend.trend != 'insufficient_data' %}
-<div class="card mb-8">
-    <h3 class="text-lg font-bold text-gray-800 mb-4">📈 Análisis de Tendencia</h3>
-    <div class="flex items-center gap-4 mb-4">
-        <span class="text-3xl">
-            {% if trend.trend == 'improving' %}📈
-            {% elif trend.trend == 'deteriorating' %}📉
-            {% else %}➡️{% endif %}
-        </span>
-        <div>
-            <p class="font-bold text-gray-800">{{ trend.label }}</p>
-            <p class="text-sm text-gray-500">{{ trend.message }}</p>
+<div class="glass-card p-6 mb-8 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:bg-slate-900/60 group">
+    <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+    <div class="relative">
+        <h3 class="text-base font-semibold text-white mb-5 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-xl bg-amber-500/10 flex items-center justify-center text-sm">📈</span>
+            Análisis de Tendencia
+        </h3>
+        <div class="flex items-center gap-4 mb-6 p-4 bg-white/5 border border-white/5 rounded-2xl">
+            <span class="text-4xl">
+                {% if trend.trend == 'improving' %}📈
+                {% elif trend.trend == 'deteriorating' %}📉
+                {% else %}➡️{% endif %}
+            </span>
+            <div>
+                <p class="font-semibold text-white">{{ trend.label }}</p>
+                <p class="text-sm text-slate-400 mt-0.5">{{ trend.message }}</p>
+            </div>
         </div>
-    </div>
-    <div class="grid grid-cols-3 gap-4">
-        <div class="bg-gray-50 rounded-xl p-4 text-center">
-            <p class="text-xs text-gray-400 mb-1">Tendencia Ingresos</p>
-            <p class="text-xl font-bold
-                {% if trend.income_trend >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                {% if trend.income_trend >= 0 %}+{% endif %}{{ trend.income_trend|floatformat:1 }}%
-            </p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4 text-center">
-            <p class="text-xs text-gray-400 mb-1">Tendencia Gastos</p>
-            <p class="text-xl font-bold
-                {% if trend.expense_trend <= 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                {% if trend.expense_trend >= 0 %}+{% endif %}{{ trend.expense_trend|floatformat:1 }}%
-            </p>
-        </div>
-        <div class="bg-gray-50 rounded-xl p-4 text-center">
-            <p class="text-xs text-gray-400 mb-1">Tendencia Ahorro</p>
-            <p class="text-xl font-bold
-                {% if trend.savings_trend >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                {% if trend.savings_trend >= 0 %}+{% endif %}{{ trend.savings_trend|floatformat:1 }}%
-            </p>
+        <div class="grid grid-cols-3 gap-4">
+            <div class="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Tendencia Ingresos</p>
+                <p class="text-2xl font-light
+                    {% if trend.income_trend >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                    {% if trend.income_trend >= 0 %}+{% endif %}{{ trend.income_trend|floatformat:1 }}%
+                </p>
+            </div>
+            <div class="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Tendencia Gastos</p>
+                <p class="text-2xl font-light
+                    {% if trend.expense_trend <= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                    {% if trend.expense_trend >= 0 %}+{% endif %}{{ trend.expense_trend|floatformat:1 }}%
+                </p>
+            </div>
+            <div class="bg-white/5 border border-white/5 rounded-2xl p-4 text-center">
+                <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Tendencia Ahorro</p>
+                <p class="text-2xl font-light
+                    {% if trend.savings_trend >= 0 %}text-emerald-400{% else %}text-rose-400{% endif %}">
+                    {% if trend.savings_trend >= 0 %}+{% endif %}{{ trend.savings_trend|floatformat:1 }}%
+                </p>
+            </div>
         </div>
     </div>
 </div>
@@ -222,120 +278,132 @@
 
 <!-- Anomalías -->
 {% if analysis.anomalies %}
-<div class="card mb-8">
-    <h3 class="text-lg font-bold text-gray-800 mb-4">
-        🔍 Gastos Inusuales Detectados
-    </h3>
-    <div class="space-y-3">
-        {% for anomaly in analysis.anomalies %}
-        <div class="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-xl">
-            <div class="flex items-center gap-3">
-                <span class="text-2xl">⚠️</span>
-                <div>
-                    <p class="text-sm font-semibold text-gray-800">
-                        {{ anomaly.description }}
+<div class="glass-card p-6 mb-8 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-2 transition-all duration-500 hover:-translate-y-1 hover:border-amber-500/30 hover:bg-slate-900/60 group">
+    <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+    <div class="relative">
+        <h3 class="text-base font-semibold text-white mb-5 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-xl bg-amber-500/10 flex items-center justify-center text-sm">🔍</span>
+            Gastos Inusuales Detectados
+        </h3>
+        <div class="space-y-3">
+            {% for anomaly in analysis.anomalies %}
+            <div class="flex items-center justify-between p-4 bg-amber-500/5 border border-amber-500/20 rounded-2xl hover:border-amber-500/30 transition-all duration-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl flex-shrink-0">⚠️</div>
+                    <div>
+                        <p class="text-sm font-medium text-slate-200">
+                            {{ anomaly.description }}
+                        </p>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            {{ anomaly.category }} · {{ anomaly.date }}
+                        </p>
+                    </div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <p class="text-sm font-semibold text-amber-400">
+                        ${{ anomaly.amount|floatformat:0 }}
                     </p>
-                    <p class="text-xs text-gray-500">
-                        {{ anomaly.category }} · {{ anomaly.date }}
+                    <p class="text-xs text-amber-600">
+                        +{{ anomaly.excess_percentage|floatformat:0 }}% del promedio
                     </p>
                 </div>
             </div>
-            <div class="text-right">
-                <p class="text-sm font-bold text-orange-600">
-                    ${{ anomaly.amount|floatformat:0 }}
-                </p>
-                <p class="text-xs text-orange-400">
-                    +{{ anomaly.excess_percentage|floatformat:0 }}% del promedio
-                </p>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endif %}
 
 <!-- Recomendaciones Completas -->
-<div class="card mb-8">
-    <h3 class="text-lg font-bold text-gray-800 mb-4">
-        🧠 Recomendaciones Personalizadas
-    </h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {% for rec in analysis.recommendations %}
-        <div class="p-4 rounded-xl border
-            {% if rec.type == 'danger' %}bg-red-50 border-red-200
-            {% elif rec.type == 'warning' %}bg-yellow-50 border-yellow-200
-            {% elif rec.type == 'success' %}bg-green-50 border-green-200
-            {% else %}bg-blue-50 border-blue-200{% endif %}">
-            <div class="flex items-start gap-3">
-                <span class="text-xl mt-0.5">
+<div class="glass-card p-6 mb-8 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 transition-all duration-500 hover:-translate-y-1 hover:border-indigo-500/20 hover:bg-slate-900/60 group">
+    <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+    <div class="relative">
+        <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-xl bg-indigo-500/10 flex items-center justify-center text-sm">🧠</span>
+            Recomendaciones Personalizadas
+        </h3>
+        <p class="text-xs text-slate-500 mb-5">Análisis IA de tu comportamiento financiero</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for rec in analysis.recommendations %}
+            <div class="p-4 rounded-2xl border flex items-start gap-3
+                {% if rec.type == 'danger' %}bg-rose-500/5 border-rose-500/20
+                {% elif rec.type == 'warning' %}bg-amber-500/5 border-amber-500/20
+                {% elif rec.type == 'success' %}bg-emerald-400/5 border-emerald-400/20
+                {% else %}bg-blue-500/5 border-blue-500/20{% endif %}">
+                <span class="text-xl mt-0.5 flex-shrink-0">
                     {% if rec.type == 'danger' %}🚨
                     {% elif rec.type == 'warning' %}⚠️
                     {% elif rec.type == 'success' %}✅
                     {% else %}💡{% endif %}
                 </span>
                 <div class="flex-1">
-                    <p class="font-semibold text-sm text-gray-800">{{ rec.title }}</p>
-                    <p class="text-xs text-gray-600 mt-1">{{ rec.description }}</p>
-                    <div class="mt-2 pt-2 border-t border-current border-opacity-20">
+                    <p class="text-sm font-semibold text-slate-200">{{ rec.title }}</p>
+                    <p class="text-xs text-slate-400 mt-1 leading-relaxed">{{ rec.description }}</p>
+                    <div class="mt-2 pt-2 border-t border-white/5">
                         <p class="text-xs font-medium
-                            {% if rec.type == 'danger' %}text-red-600
-                            {% elif rec.type == 'warning' %}text-yellow-600
-                            {% elif rec.type == 'success' %}text-green-600
-                            {% else %}text-blue-600{% endif %}">
+                            {% if rec.type == 'danger' %}text-rose-400
+                            {% elif rec.type == 'warning' %}text-amber-400
+                            {% elif rec.type == 'success' %}text-emerald-400
+                            {% else %}text-blue-400{% endif %}">
                             🎯 {{ rec.action }}
                         </p>
                     </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="col-span-2 text-center py-10">
+                <p class="text-4xl mb-3">🎉</p>
+                <p class="text-slate-300 font-medium">¡Sin recomendaciones! Tus finanzas están en excelente estado.</p>
+            </div>
+            {% endfor %}
         </div>
-        {% empty %}
-        <div class="col-span-2 text-center py-8 text-gray-400">
-            <p class="text-4xl mb-2">🎉</p>
-            <p class="font-medium">¡Sin recomendaciones! Tus finanzas están en excelente estado.</p>
-        </div>
-        {% endfor %}
     </div>
 </div>
 
 <!-- Análisis de Metas -->
 {% if analysis.goals_analysis %}
-<div class="card">
-    <h3 class="text-lg font-bold text-gray-800 mb-4">
-        🎯 Estado de Metas Financieras
-    </h3>
-    <div class="space-y-4">
-        {% for goal in analysis.goals_analysis %}
-        <div class="p-4 border border-gray-200 rounded-xl">
-            <div class="flex items-center justify-between mb-3">
-                <div>
-                    <p class="font-semibold text-gray-800">{{ goal.name }}</p>
-                    <p class="text-xs text-gray-400">
-                        {{ goal.days_remaining }} días restantes ·
-                        ${{ goal.remaining_amount|floatformat:0 }} pendientes
-                    </p>
+<div class="glass-card p-6 opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-4 transition-all duration-500 hover:-translate-y-1 hover:border-emerald-500/20 hover:bg-slate-900/60 group">
+    <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none"></div>
+    <div class="relative">
+        <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+            <span class="w-7 h-7 rounded-xl bg-emerald-500/10 flex items-center justify-center text-sm">🎯</span>
+            Estado de Metas Financieras
+        </h3>
+        <p class="text-xs text-slate-500 mb-5">Seguimiento de tus objetivos</p>
+        <div class="space-y-4">
+            {% for goal in analysis.goals_analysis %}
+            <div class="p-4 border border-white/8 bg-white/3 rounded-2xl hover:border-white/15 transition-all duration-200">
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <p class="font-medium text-slate-200">{{ goal.name }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5">
+                            {{ goal.days_remaining }} días restantes ·
+                            ${{ goal.remaining_amount|floatformat:0 }} pendientes
+                        </p>
+                    </div>
+                    <span class="text-2xl font-light text-emerald-400">
+                        {{ goal.progress_percentage|floatformat:1 }}%
+                    </span>
                 </div>
-                <span class="text-2xl font-bold text-indigo-600">
-                    {{ goal.progress_percentage|floatformat:1 }}%
-                </span>
-            </div>
 
-            <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
-                <div class="h-2 rounded-full bg-indigo-500 transition-all"
-                     style="width: {{ goal.progress_percentage|floatformat:0 }}%">
+                <div class="w-full bg-white/5 rounded-full h-1.5 mb-3">
+                    <div class="h-1.5 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.4)] transition-all duration-700"
+                         style="width: min({{ goal.progress_percentage|floatformat:0 }}%, 100%)">
+                    </div>
                 </div>
-            </div>
 
-            {% if goal.projection.achievable %}
-            <p class="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg">
-                ✅ {{ goal.projection.message }}
-            </p>
-            {% else %}
-            <p class="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-lg">
-                ⚠️ {{ goal.projection.message }}
-            </p>
-            {% endif %}
+                {% if goal.projection.achievable %}
+                <p class="text-xs text-emerald-400 bg-emerald-500/5 border border-emerald-500/20 px-3 py-2 rounded-xl">
+                    ✅ {{ goal.projection.message }}
+                </p>
+                {% else %}
+                <p class="text-xs text-rose-400 bg-rose-500/5 border border-rose-500/20 px-3 py-2 rounded-xl">
+                    ⚠️ {{ goal.projection.message }}
+                </p>
+                {% endif %}
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
 {% endif %}
@@ -345,6 +413,25 @@
 
 {% block extra_js %}
 <script>
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = 'Plus Jakarta Sans, sans-serif';
+
+const glassTooltip = {
+    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    titleColor: '#f1f5f9',
+    bodyColor: '#94a3b8',
+    titleFont: { size: 13, weight: '600', family: 'Plus Jakarta Sans, sans-serif' },
+    bodyFont: { size: 12, family: 'Plus Jakarta Sans, sans-serif' },
+    displayColors: true,
+    boxWidth: 8,
+    boxHeight: 8,
+    usePointStyle: true,
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     fetch('{% url "ajax_dashboard_data" %}?period={{ period }}')
         .then(r => r.json())
@@ -357,36 +444,43 @@ function renderAnalysisCategoryChart(data) {
     const ctx = document.getElementById('analysisCategoryChart');
     if (!ctx || !data.labels.length) return;
 
-        const colors = [
-        '#6366f1','#f59e0b','#10b981','#ef4444',
-        '#3b82f6','#8b5cf6','#ec4899','#14b8a6',
-        '#f97316','#64748b'
+    const colors = [
+        'rgba(16,185,129,0.85)', 'rgba(59,130,246,0.85)', 'rgba(245,158,11,0.85)',
+        'rgba(239,68,68,0.85)', 'rgba(168,85,247,0.85)', 'rgba(20,184,166,0.85)',
+        'rgba(236,72,153,0.85)', 'rgba(249,115,22,0.85)', 'rgba(99,102,241,0.85)',
+        'rgba(100,116,139,0.85)'
     ];
 
     new Chart(ctx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
             labels: data.labels,
             datasets: [{
                 data: data.values,
                 backgroundColor: colors.slice(0, data.labels.length),
-                borderWidth: 3,
-                borderColor: '#ffffff',
+                borderWidth: 2,
+                borderColor: 'rgba(15, 23, 42, 0.8)',
+                hoverBorderColor: 'rgba(255,255,255,0.2)',
+                hoverOffset: 6,
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '60%',
             plugins: {
                 legend: {
                     position: 'bottom',
                     labels: {
                         font: { size: 11 },
-                        padding: 12,
+                        padding: 16,
                         usePointStyle: true,
+                        pointStyleWidth: 8,
+                        color: '#94a3b8',
                     }
                 },
                 tooltip: {
+                    ...glassTooltip,
                     callbacks: {
                         label: function(ctx) {
                             const total = data.totals[ctx.dataIndex];

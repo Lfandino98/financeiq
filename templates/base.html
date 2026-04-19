@@ -1,142 +1,319 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="es" class="h-full">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}FinanceIQ{% endblock %}</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            850: '#1e293b',
+                            950: '#020617',
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        glowPulse: {
+                            '0%, 100%': { boxShadow: '0 0 20px rgba(16,185,129,0.3)' },
+                            '50%': { boxShadow: '0 0 30px rgba(16,185,129,0.5)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Custom Styles -->
     <style>
-        .sidebar-link.active { @apply bg-indigo-700 text-white; }
-        .card { @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6; }
-        .btn-primary { @apply bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200; }
-        .btn-danger { @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200; }
-        .btn-secondary { @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors duration-200; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        
+        /* Glass card base */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+        
+        /* Botones primarios */
+        .btn-primary {
+            background: #10b981;
+            color: #020617;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            padding: 0.625rem 1.25rem;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-primary:hover {
+            background: #34d399;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
+        }
+        .btn-primary:active {
+            transform: scale(0.95);
+        }
+
+        /* Botones secundarios */
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+            font-weight: 500;
+            border-radius: 0.75rem;
+            padding: 0.625rem 1.25rem;
+            backdrop-filter: blur(12px);
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.10);
+        }
+        .btn-secondary:active {
+            transform: scale(0.95);
+        }
+
+        /* Button glow effect */
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
+        }
+        .btn-glow:active {
+            transform: scale(0.95);
+        }
+
+        /* Input glass */
+        .input-glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .input-glass:focus {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        /* Chart.js custom tooltip */
+        .chartjs-tooltip {
+            background: rgba(15, 23, 42, 0.9) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 0.75rem !important;
+            padding: 0.75rem !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Animations stagger */
+        .stagger-1 { animation-delay: 100ms; }
+        .stagger-2 { animation-delay: 200ms; }
+        .stagger-3 { animation-delay: 300ms; }
+        .stagger-4 { animation-delay: 400ms; }
+        .stagger-5 { animation-delay: 500ms; }
+        .stagger-6 { animation-delay: 600ms; }
     </style>
+    
+    {% block extra_css %}{% endblock %}
 </head>
-<body class="h-full bg-gray-50 font-sans">
 
-{% if user.is_authenticated %}
-<div class="flex h-full">
+<body class="bg-slate-950 text-slate-200 antialiased relative overflow-x-hidden min-h-screen selection:bg-emerald-500/30 selection:text-emerald-200">
+    
+    <!-- Background Orbs -->
+    <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px]"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px]"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px]"></div>
+    </div>
+
     <!-- Sidebar -->
-    <aside class="w-64 bg-indigo-800 text-white flex flex-col fixed h-full z-10">
+    {% if user.is_authenticated %}
+    <aside class="fixed left-0 top-0 h-full w-72 bg-slate-900/50 backdrop-blur-xl border-r border-white/5 z-40 flex flex-col">
         <!-- Logo -->
-        <div class="p-6 border-b border-indigo-700">
-            <h1 class="text-2xl font-bold text-white">💰 FinanceIQ</h1>
-            <p class="text-indigo-300 text-sm mt-1">
-                Hola, {{ user.first_name|default:user.username }}
-            </p>
+        <div class="p-6 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                    <span class="text-2xl">💎</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white">FinanceIQ</h1>
+                    <p class="text-xs text-slate-400">Gestión Financiera</p>
+                </div>
+            </div>
         </div>
-
+        
         <!-- Navigation -->
-        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-            <a href="{% url 'dashboard' %}"
-               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'dashboard' %}active{% endif %}">
+        <nav class="flex-1 p-4 space-y-2">
+            {% url 'dashboard' as dashboard_url %}
+            <a href="{{ dashboard_url }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {% if request.path == dashboard_url %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %}">
                 <span class="text-xl">📊</span>
                 <span class="font-medium">Dashboard</span>
             </a>
-            <a href="{% url 'income_list' %}"
-               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'incomes' %}active{% endif               %}">
+            
+            {% url 'income_list' as income_url %}
+            <a href="{{ income_url }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {% if request.path == income_url or request.path == '/ingresos/crear/' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %}">
                 <span class="text-xl">💵</span>
                 <span class="font-medium">Ingresos</span>
             </a>
-            <a href="{% url 'expense_list' %}"
-               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'expenses' %}active{% endif %}">
+            
+            {% url 'expense_list' as expense_url %}
+            <a href="{{ expense_url }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {% if request.path == expense_url or request.path == '/gastos/crear/' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %}">
                 <span class="text-xl">💸</span>
                 <span class="font-medium">Gastos</span>
             </a>
-            <a href="{% url 'goal_list' %}"
-               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'goals' %}active{% endif %}">
+            
+            {% url 'goal_list' as goal_url %}
+            <a href="{{ goal_url }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {% if request.path == goal_url or request.path == '/metas/crear/' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %}">
                 <span class="text-xl">🎯</span>
                 <span class="font-medium">Metas</span>
             </a>
-            <a href="{% url 'analysis' %}"
-               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'analysis' %}active{% endif %}">
+            
+            {% url 'analysis' as analysis_url %}
+            <a href="{{ analysis_url }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {% if request.path == analysis_url %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %}">
                 <span class="text-xl">🧠</span>
                 <span class="font-medium">Análisis</span>
             </a>
-            <a href="{% url 'category_list' %}"
-               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'categories' %}active{% endif %}">
+            
+            {% url 'alert_list' as alert_url %}
+            <a href="{{ alert_url }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {% if request.path == alert_url %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %}">
+                <span class="text-xl">🔔</span>
+                <span class="font-medium">Alertas</span>
+                {% if unread_alerts_count > 0 %}
+                <span class="ml-auto bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ unread_alerts_count }}</span>
+                {% endif %}
+            </a>
+            
+            {% url 'category_list' as category_url %}
+            <a href="{{ category_url }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {% if request.path == category_url %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}text-slate-400 hover:bg-white/5 hover:text-white{% endif %}">
                 <span class="text-xl">🏷️</span>
                 <span class="font-medium">Categorías</span>
             </a>
-            <a href="{% url 'alerts' %}"
-               class="sidebar-link flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-100 hover:bg-indigo-700 transition-colors {% if active_page == 'alerts' %}active{% endif %}">
-                <span class="text-xl">🔔</span>
-                <span class="font-medium">Alertas</span>
-                {% if unread_alerts_count %}
-                <span class="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                    {{ unread_alerts_count }}
-                </span>
-                {% endif %}
-            </a>
         </nav>
-
-        <!-- User section -->
-        <div class="p-4 border-t border-indigo-700">
-            <a href="{% url 'logout' %}"
-               class="flex items-center gap-3 px-4 py-3 rounded-xl text-indigo-200 hover:bg-indigo-700 transition-colors w-full">
-                <span class="text-xl">🚪</span>
-                <span class="font-medium">Cerrar sesión</span>
-            </a>
+        
+        <!-- User -->
+        <div class="p-4 border-t border-white/5">
+            <div class="flex items-center gap-3 px-4 py-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-white font-bold">
+                    {{ user.username|upper|slice:":1" }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-white truncate">{{ user.username }}</p>
+                    <p class="text-xs text-slate-400">Usuario</p>
+                </div>
+                <a href="{% url 'logout' %}" class="text-slate-400 hover:text-rose-400 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+                    </svg>
+                </a>
+            </div>
         </div>
     </aside>
+    {% endif %}
 
-    <!-- Main content -->
-    <main class="flex-1 ml-64 min-h-full">
-        <!-- Top bar -->
-        <header class="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
-            <div>
-                <h2 class="text-xl font-bold text-gray-800">
-                    {% block page_title %}Dashboard{% endblock %}
-                </h2>
-                <p class="text-sm text-gray-500">
-                    {% block page_subtitle %}{% endblock %}
-                </p>
-            </div>
-            <div class="flex items-center gap-4">
-                {% block header_actions %}{% endblock %}
-                <span class="text-sm text-gray-500">
-                    {{ today|date:"d M Y" }}
-                </span>
+    <!-- Main Content -->
+    <main class="{% if user.is_authenticated %}ml-72{% endif %} min-h-screen transition-all duration-300">
+        <!-- Header -->
+        {% if user.is_authenticated %}
+        <header class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur-xl border-b border-white/5">
+            <div class="px-8 py-4 flex items-center justify-between">
+                <div>
+                    {% block page_title %}
+                    <h2 class="text-2xl font-bold text-white">Dashboard</h2>
+                    {% endblock %}
+                    {% block page_subtitle %}
+                    <p class="text-sm text-slate-400">Resumen de tu situación financiera</p>
+                    {% endblock %}
+                </div>
+                <div class="flex items-center gap-4">
+                    {% block header_actions %}{% endblock %}
+                </div>
             </div>
         </header>
-
-        <!-- Messages -->
-        {% if messages %}
-        <div class="px-8 pt-4">
-            {% for message in messages %}
-            <div class="mb-3 p-4 rounded-xl flex items-center gap-3
-                {% if message.tags == 'error' %}bg-red-50 border border-red-200 text-red-700
-                {% elif message.tags == 'success' %}bg-green-50 border border-green-200 text-green-700
-                {% elif message.tags == 'warning' %}bg-yellow-50 border border-yellow-200 text-yellow-700
-                {% else %}bg-blue-50 border border-blue-200 text-blue-700{% endif %}">
-                <span>
-                    {% if message.tags == 'error' %}❌
-                    {% elif message.tags == 'success' %}✅
-                    {% elif message.tags == 'warning' %}⚠️
-                    {% else %}ℹ️{% endif %}
-                </span>
-                <span class="font-medium">{{ message }}</span>
-            </div>
-            {% endfor %}
-        </div>
         {% endif %}
 
-        <!-- Page content -->
+        <!-- Content -->
         <div class="p-8">
             {% block content %}{% endblock %}
         </div>
     </main>
-</div>
 
-{% else %}
-<!-- Unauthenticated layout -->
-<div class="min-h-full">
-    {% block auth_content %}{% endblock %}
-</div>
-{% endif %}
-
-{% block extra_js %}{% endblock %}
+    <!-- JavaScript -->
+    <script src="{% static 'js/financeiq.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

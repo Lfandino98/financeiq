@@ -8,8 +8,8 @@
 <div class="flex items-center gap-2">
     {% for option in period_options %}
     <a href="?period={{ option.value }}"
-       class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-              {% if period == option.value %}bg-indigo-600 text-white{% else %}bg-gray-100 text-gray-600 hover:bg-gray-200{% endif %}">
+       class="px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300
+              {% if period == option.value %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]{% else %}bg-white/5 text-slate-400 border border-white/10 hover:bg-white/10 hover:text-white{% endif %}">
         {{ option.label }}
     </a>
     {% endfor %}
@@ -20,277 +20,346 @@
 {% with summary=analysis.summary health=analysis.health %}
 
 <!-- KPI Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
 
     <!-- Ingresos -->
-    <div class="card">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-500">Ingresos</span>
-            <span class="text-2xl">💵</span>
+    <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(16,185,129,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-1 group cursor-default">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ingresos</span>
+                <div class="w-10 h-10 rounded-2xl bg-emerald-400/10 border border-emerald-400/20 flex items-center justify-center text-lg">💵</div>
+            </div>
+            <p class="text-4xl font-light text-white tracking-tight">
+                ${{ summary.total_income|floatformat:0 }}
+            </p>
+            {% with change=dashboard_data.comparison.income_change %}
+            <div class="flex items-center gap-1.5 mt-3">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {% if change >= 0 %}bg-emerald-400/10 text-emerald-400 border border-emerald-400/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+                    {% if change >= 0 %}▲{% else %}▼{% endif %}
+                    {{ change|floatformat:1 }}%
+                </span>
+                <span class="text-xs text-slate-500">vs mes anterior</span>
+            </div>
+            {% endwith %}
         </div>
-        <p class="text-3xl font-bold text-green-600">
-            ${{ summary.total_income|floatformat:0 }}
-        </p>
-        {% with change=dashboard_data.comparison.income_change %}
-        <p class="text-sm mt-2 {% if change >= 0 %}text-green-500{% else %}text-red-500{% endif %}">
-            {% if change >= 0 %}↑{% else %}↓{% endif %}
-            {{ change|floatformat:1 }}% vs mes anterior
-        </p>
-        {% endwith %}
     </div>
 
     <!-- Gastos -->
-    <div class="card">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-500">Gastos</span>
-            <span class="text-2xl">💸</span>
+    <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-rose-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(244,63,94,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-2 group cursor-default">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Gastos</span>
+                <div class="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-lg">💸</div>
+            </div>
+            <p class="text-4xl font-light text-white tracking-tight">
+                ${{ summary.total_expenses|floatformat:0 }}
+            </p>
+            {% with change=dashboard_data.comparison.expense_change %}
+            <div class="flex items-center gap-1.5 mt-3">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium {% if change <= 0 %}bg-emerald-400/10 text-emerald-400 border border-emerald-400/20{% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+                    {% if change >= 0 %}▲{% else %}▼{% endif %}
+                    {{ change|floatformat:1 }}%
+                </span>
+                <span class="text-xs text-slate-500">vs mes anterior</span>
+            </div>
+            {% endwith %}
         </div>
-        <p class="text-3xl font-bold text-red-500">
-                        ${{ summary.total_expenses|floatformat:0 }}
-        </p>
-        {% with change=dashboard_data.comparison.expense_change %}
-        <p class="text-sm mt-2 {% if change <= 0 %}text-green-500{% else %}text-red-500{% endif %}">
-            {% if change >= 0 %}↑{% else %}↓{% endif %}
-            {{ change|floatformat:1 }}% vs mes anterior
-        </p>
-        {% endwith %}
     </div>
 
-    <!-- Ahorro -->
-    <div class="card">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-500">Ahorro Neto</span>
-            <span class="text-2xl">🏦</span>
+    <!-- Ahorro Neto -->
+    <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-blue-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(59,130,246,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 group cursor-default">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Ahorro Neto</span>
+                <div class="w-10 h-10 rounded-2xl bg-blue-400/10 border border-blue-400/20 flex items-center justify-center text-lg">🏦</div>
+            </div>
+            <p class="text-4xl font-light tracking-tight {% if summary.net_savings >= 0 %}text-white{% else %}text-rose-400{% endif %}">
+                ${{ summary.net_savings|floatformat:0 }}
+            </p>
+            <div class="flex items-center gap-1.5 mt-3">
+                <span class="text-xs text-slate-500">Tasa de ahorro:</span>
+                <span class="text-xs font-semibold {% if summary.savings_rate >= 20 %}text-emerald-400{% elif summary.savings_rate >= 10 %}text-amber-400{% else %}text-rose-400{% endif %}">
+                    {{ summary.savings_rate|floatformat:1 }}%
+                </span>
+            </div>
         </div>
-        <p class="text-3xl font-bold {% if summary.net_savings >= 0 %}text-indigo-600{% else %}text-red-600{% endif %}">
-            ${{ summary.net_savings|floatformat:0 }}
-        </p>
-        <p class="text-sm mt-2 text-gray-500">
-            {{ summary.savings_rate|floatformat:1 }}% de tus ingresos
-        </p>
     </div>
 
     <!-- Salud Financiera -->
-    <div class="card">
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-sm font-medium text-gray-500">Salud Financiera</span>
-            <span class="text-2xl">{{ health.icon }}</span>
+    <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-purple-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(168,85,247,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-4 group cursor-default">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-4">
+                <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Salud Financiera</span>
+                <div class="w-10 h-10 rounded-2xl bg-purple-400/10 border border-purple-400/20 flex items-center justify-center text-lg">{{ health.icon }}</div>
+            </div>
+            <p class="text-4xl font-light text-white tracking-tight">
+                {{ health.score }}<span class="text-xl text-slate-500">/100</span>
+            </p>
+            <div class="flex items-center gap-1.5 mt-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium
+                    {% if health.status == 'healthy' %}bg-emerald-400/10 text-emerald-400 border border-emerald-400/20
+                    {% elif health.status == 'stable' %}bg-amber-400/10 text-amber-400 border border-amber-400/20
+                    {% else %}bg-rose-500/10 text-rose-400 border border-rose-500/20{% endif %}">
+                    {{ health.label }}
+                </span>
+            </div>
         </div>
-        <p class="text-3xl font-bold
-            {% if health.status == 'healthy' %}text-green-600
-            {% elif health.status == 'stable' %}text-yellow-500
-            {% else %}text-red-600{% endif %}">
-            {{ health.score }}/100
-        </p>
-        <p class="text-sm mt-2 font-medium
-            {% if health.status == 'healthy' %}text-green-500
-            {% elif health.status == 'stable' %}text-yellow-500
-            {% else %}text-red-500{% endif %}">
-            {{ health.label }}
-        </p>
     </div>
 </div>
 
 <!-- Charts Row -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
 
     <!-- Gráfica de Categorías -->
-    <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">
-            📊 Gastos por Categoría
-        </h3>
-        <div class="relative h-64">
-            <canvas id="categoryChart"></canvas>
+    <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(16,185,129,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-2 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-emerald-500/10 flex items-center justify-center text-sm">📊</span>
+                Gastos por Categoría
+            </h3>
+            <p class="text-xs text-slate-500 mb-5">Distribución del período actual</p>
+            <div class="relative h-64">
+                <canvas id="categoryChart"></canvas>
+            </div>
         </div>
     </div>
 
     <!-- Gráfica de Proyecciones -->
-    <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">
-            📈 Proyección de Ahorro
-        </h3>
-        <div class="relative h-64">
-            <canvas id="projectionChart"></canvas>
+    <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-blue-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(59,130,246,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-blue-500/10 flex items-center justify-center text-sm">📈</span>
+                Proyección de Ahorro
+            </h3>
+            <p class="text-xs text-slate-500 mb-5">Escenarios a futuro</p>
+            <div class="relative h-64">
+                <canvas id="projectionChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Resumen Ingresos vs Gastos -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-8">
 
     <!-- Barra de progreso Ingresos vs Gastos -->
-    <div class="card lg:col-span-2">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">
-            ⚖️ Ingresos vs Gastos
-        </h3>
-        <div class="relative h-48">
-            <canvas id="summaryChart"></canvas>
-        </div>
+    <div class="glass-card p-6 lg:col-span-2 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(16,185,129,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-2 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-white/10 flex items-center justify-center text-sm">⚖️</span>
+                Ingresos vs Gastos
+            </h3>
+            <p class="text-xs text-slate-500 mb-5">Balance del período</p>
+            <div class="relative h-48">
+                <canvas id="summaryChart"></canvas>
+            </div>
 
-        <!-- Indicadores -->
-        <div class="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-gray-100">
-            <div class="text-center">
-                <p class="text-xs text-gray-500 mb-1">Gasto diario promedio</p>
-                <p class="text-lg font-bold text-gray-800">
-                    ${{ summary.daily_avg_expense|floatformat:0 }}
-                </p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-gray-500 mb-1">Ratio gasto/ingreso</p>
-                <p class="text-lg font-bold
-                    {% if summary.expense_ratio > 90 %}text-red-600
-                    {% elif summary.expense_ratio > 70 %}text-yellow-500
-                    {% else %}text-green-600{% endif %}">
-                    {{ summary.expense_ratio|floatformat:1 }}%
-                </p>
-            </div>
-            <div class="text-center">
-                <p class="text-xs text-gray-500 mb-1">Transacciones</p>
-                <p class="text-lg font-bold text-gray-800">
-                    {{ summary.transactions_count }}
-                </p>
+            <!-- Indicadores -->
+            <div class="grid grid-cols-3 gap-4 mt-5 pt-5 border-t border-white/5">
+                <div class="text-center">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Gasto diario</p>
+                    <p class="text-xl font-light text-white">
+                        ${{ summary.daily_avg_expense|floatformat:0 }}
+                    </p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Ratio gasto</p>
+                    <p class="text-xl font-light
+                        {% if summary.expense_ratio > 90 %}text-rose-400
+                        {% elif summary.expense_ratio > 70 %}text-amber-400
+                        {% else %}text-emerald-400{% endif %}">
+                        {{ summary.expense_ratio|floatformat:1 }}%
+                    </p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Transacciones</p>
+                    <p class="text-xl font-light text-white">
+                        {{ summary.transactions_count }}
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Estado de Salud Detallado -->
-    <div class="card">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">
-            🏥 Factores de Salud
-        </h3>
-        <div class="space-y-3">
-            {% for factor in health.factors %}
-            <div class="flex items-start gap-2">
-                <span class="text-sm mt-0.5">
-                    {% if factor.status == 'good' %}✅
-                    {% elif factor.status == 'warning' %}⚠️
-                    {% elif factor.status == 'danger' %}🚨
-                    {% elif factor.status == 'critical' %}🔴
-                    {% else %}ℹ️{% endif %}
-                </span>
-                <div>
-                    <p class="text-xs font-semibold text-gray-700">{{ factor.name }}</p>
-                    <p class="text-xs text-gray-500">{{ factor.message }}</p>
+    <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-purple-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(168,85,247,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <h3 class="text-base font-semibold text-white mb-1 flex items-center gap-2">
+                <span class="w-7 h-7 rounded-xl bg-purple-500/10 flex items-center justify-center text-sm">🏥</span>
+                Factores de Salud
+            </h3>
+            <p class="text-xs text-slate-500 mb-5">Indicadores clave</p>
+            <div class="space-y-3">
+                {% for factor in health.factors %}
+                <div class="flex items-start gap-3 p-3 rounded-2xl bg-white/3 border border-white/5">
+                    <span class="text-base mt-0.5 flex-shrink-0">
+                        {% if factor.status == 'good' %}✅
+                        {% elif factor.status == 'warning' %}⚠️
+                        {% elif factor.status == 'danger' %}🚨
+                        {% elif factor.status == 'critical' %}🔴
+                        {% else %}ℹ️{% endif %}
+                    </span>
+                    <div>
+                        <p class="text-xs font-semibold text-slate-200">{{ factor.name }}</p>
+                        <p class="text-xs text-slate-500 mt-0.5 leading-relaxed">{{ factor.message }}</p>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
 </div>
 
 <!-- Bottom Row -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
     <!-- Recomendaciones -->
-    <div class="card lg:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-bold text-gray-800">🧠 Recomendaciones</h3>
-            <a href="{% url 'analysis' %}" class="text-sm text-indigo-600 hover:underline">
-                Ver todas →
-            </a>
-        </div>
-        <div class="space-y-3">
-            {% for rec in analysis.recommendations|slice:":4" %}
-            <div class="p-4 rounded-xl border
-                {% if rec.type == 'danger' %}bg-red-50 border-red-200
-                {% elif rec.type == 'warning' %}bg-yellow-50 border-yellow-200
-                {% elif rec.type == 'success' %}bg-green-50 border-green-200
-                {% else %}bg-blue-50 border-blue-200{% endif %}">
-                <p class="font-semibold text-sm text-gray-800">{{ rec.title }}</p>
-                <p class="text-xs text-gray-600 mt-1">{{ rec.description }}</p>
-                <p class="text-xs font-medium mt-2
-                    {% if rec.type == 'danger' %}text-red-600
-                    {% elif rec.type == 'warning' %}text-yellow-600
-                    {% elif rec.type == 'success' %}text-green-600
-                    {% else %}text-blue-600{% endif %}">
-                    💡 {{ rec.action }}
-                </p>
-            </div>
-            {% empty %}
-            <div class="text-center py-8 text-gray-400">
-                <p class="text-4xl mb-2">🎉</p>
-                <p class="font-medium">¡Sin recomendaciones por ahora!</p>
-                <p class="text-sm">Tus finanzas están en excelente estado.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Panel Derecho -->
-    <div class="space-y-6">
-
-        <!-- Últimas Transacciones -->
-        <div class="card">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-bold text-gray-800">🕐 Recientes</h3>
-                <a href="{% url 'expense_list' %}" class="text-xs text-indigo-600 hover:underline">
-                    Ver más →
-                </a>
-            </div>
-            <div class="space-y-3">
-                {% for expense in dashboard_data.recent_expenses %}
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2">
-                        <span class="text-lg">
-                            {{ expense.category.icon|default:"📦" }}
-                        </span>
-                        <div>
-                            <p class="text-xs font-medium text-gray-800 truncate max-w-24">
-                                {{ expense.description }}
-                            </p>
-                            <p class="text-xs text-gray-400">{{ expense.date }}</p>
-                        </div>
-                    </div>
-                    <span class="text-sm font-bold text-red-500">
-                        -${{ expense.amount|floatformat:0 }}
-                    </span>
+    <div class="glass-card p-6 lg:col-span-2 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-indigo-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(99,102,241,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-3 group">
+        <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+        <div class="relative">
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <h3 class="text-base font-semibold text-white flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-xl bg-indigo-500/10 flex items-center justify-center text-sm">🧠</span>
+                        Recomendaciones IA
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Análisis personalizado</p>
                 </div>
-                {% empty %}
-                <p class="text-xs text-gray-400 text-center py-4">
-                    No hay gastos recientes
-                </p>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Metas Activas -->
-        <div class="card">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-base font-bold text-gray-800">🎯 Metas</h3>
-                <a href="{% url 'goal_list' %}" class="text-xs text-indigo-600 hover:underline">
+                <a href="{% url 'analysis' %}"
+                   class="bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-medium rounded-xl py-2 px-3 backdrop-blur-md transition-all duration-300 active:scale-95">
                     Ver todas →
                 </a>
             </div>
             <div class="space-y-3">
-                {% for goal in dashboard_data.active_goals %}
-                <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <p class="text-xs font-medium text-gray-700 truncate max-w-32">
-                            {{ goal.name }}
-                        </p>
-                        <p class="text-xs font-bold text-indigo-600">
-                            {{ goal.progress_percentage|floatformat:0 }}%
+                {% for rec in analysis.recommendations|slice:":4" %}
+                <div class="p-4 rounded-2xl border flex items-start gap-3
+                    {% if rec.type == 'danger' %}bg-rose-500/5 border-rose-500/20
+                    {% elif rec.type == 'warning' %}bg-amber-500/5 border-amber-500/20
+                    {% elif rec.type == 'success' %}bg-emerald-400/5 border-emerald-400/20
+                    {% else %}bg-blue-500/5 border-blue-500/20{% endif %}">
+                    <span class="text-lg mt-0.5 flex-shrink-0">
+                        {% if rec.type == 'danger' %}🚨
+                        {% elif rec.type == 'warning' %}⚠️
+                        {% elif rec.type == 'success' %}✅
+                        {% else %}💡{% endif %}
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-200">{{ rec.title }}</p>
+                        <p class="text-xs text-slate-400 mt-1 leading-relaxed">{{ rec.description }}</p>
+                        <p class="text-xs font-medium mt-2
+                            {% if rec.type == 'danger' %}text-rose-400
+                            {% elif rec.type == 'warning' %}text-amber-400
+                            {% elif rec.type == 'success' %}text-emerald-400
+                            {% else %}text-blue-400{% endif %}">
+                            🎯 {{ rec.action }}
                         </p>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-indigo-600 h-2 rounded-full transition-all"
-                             style="width: {{ goal.progress_percentage|floatformat:0 }}%">
-                        </div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-1">
-                        ${{ goal.current_amount|floatformat:0 }} /
-                        ${{ goal.target_amount|floatformat:0 }}
-                    </p>
                 </div>
                 {% empty %}
-                <div class="text-center py-4">
-                    <p class="text-xs text-gray-400">No hay metas activas</p>
-                    <a href="{% url 'goal_create' %}"
-                       class="text-xs text-indigo-600 hover:underline mt-1 block">
-                        + Crear meta
-                    </a>
+                <div class="text-center py-8">
+                    <p class="text-4xl mb-3">🎉</p>
+                    <p class="text-slate-300 font-medium">¡Sin recomendaciones por ahora!</p>
+                    <p class="text-slate-500 text-sm mt-1">Tus finanzas están en excelente estado.</p>
                 </div>
                 {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel Derecho -->
+    <div class="space-y-5">
+
+        <!-- Últimas Transacciones -->
+        <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-emerald-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(16,185,129,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-4 group">
+            <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                        <span>🕐</span> Recientes
+                    </h3>
+                    <a href="{% url 'expense_list' %}" class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+                        Ver más →
+                    </a>
+                </div>
+                <div class="space-y-3">
+                    {% for expense in dashboard_data.recent_expenses %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-sm flex-shrink-0">
+                                {{ expense.category.icon|default:"📦" }}
+                            </div>
+                            <div>
+                                <p class="text-xs font-medium text-slate-200 truncate max-w-24">
+                                    {{ expense.description }}
+                                </p>
+                                <p class="text-xs text-slate-500">{{ expense.date }}</p>
+                            </div>
+                        </div>
+                        <span class="text-sm font-semibold text-rose-400">
+                            -${{ expense.amount|floatformat:0 }}
+                        </span>
+                    </div>
+                    {% empty %}
+                    <p class="text-xs text-slate-500 text-center py-4">
+                        No hay gastos recientes
+                    </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Metas Activas -->
+        <div class="glass-card p-6 transition-all duration-500 ease-out hover:-translate-y-1 hover:border-amber-500/30 hover:bg-slate-900/60 hover:shadow-[0_8px_30px_-5px_rgba(245,158,11,0.15)] opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards] stagger-5 group">
+            <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-3xl pointer-events-none"></div>
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                        <span>🎯</span> Metas
+                    </h3>
+                    <a href="{% url 'goal_list' %}" class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">
+                        Ver todas →
+                    </a>
+                </div>
+                <div class="space-y-4">
+                    {% for goal in dashboard_data.active_goals %}
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-xs font-medium text-slate-300 truncate max-w-32">
+                                {{ goal.name }}
+                            </p>
+                            <p class="text-xs font-bold text-emerald-400">
+                                {{ goal.progress_percentage|floatformat:0 }}%
+                            </p>
+                        </div>
+                        <!-- Progress bar glassmorphism -->
+                        <div class="w-full bg-white/5 rounded-full h-1.5 border border-white/5">
+                            <div class="h-1.5 rounded-full transition-all duration-700 bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.5)]"
+                                 style="width: {{ goal.progress_percentage|floatformat:0 }}%">
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1.5">
+                            ${{ goal.current_amount|floatformat:0 }} /
+                            ${{ goal.target_amount|floatformat:0 }}
+                        </p>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <p class="text-xs text-slate-500">No hay metas activas</p>
+                        <a href="{% url 'goal_create' %}"
+                           class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors mt-1 block">
+                            + Crear meta
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -301,6 +370,27 @@
 
 {% block extra_js %}
 <script>
+// Configuración global de Chart.js para el tema dark glass
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.font.family = 'Plus Jakarta Sans, sans-serif';
+
+// Tooltip personalizado glassmorphism
+const glassTooltip = {
+    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    titleColor: '#f1f5f9',
+    bodyColor: '#94a3b8',
+    titleFont: { size: 13, weight: '600', family: 'Plus Jakarta Sans, sans-serif' },
+    bodyFont: { size: 12, family: 'Plus Jakarta Sans, sans-serif' },
+    displayColors: true,
+    boxWidth: 8,
+    boxHeight: 8,
+    usePointStyle: true,
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     fetch('{% url "ajax_dashboard_data" %}?period={{ period }}')
         .then(r => r.json())
@@ -317,9 +407,10 @@ function renderCategoryChart(data) {
     if (!ctx || !data.labels.length) return;
 
     const colors = [
-        '#6366f1','#f59e0b','#10b981','#ef4444',
-        '#3b82f6','#8b5cf6','#ec4899','#14b8a6',
-        '#f97316','#64748b'
+        'rgba(16,185,129,0.85)', 'rgba(59,130,246,0.85)', 'rgba(245,158,11,0.85)',
+        'rgba(239,68,68,0.85)', 'rgba(168,85,247,0.85)', 'rgba(20,184,166,0.85)',
+        'rgba(236,72,153,0.85)', 'rgba(249,115,22,0.85)', 'rgba(99,102,241,0.85)',
+        'rgba(100,116,139,0.85)'
     ];
 
     new Chart(ctx, {
@@ -330,22 +421,28 @@ function renderCategoryChart(data) {
                 data: data.values,
                 backgroundColor: colors.slice(0, data.labels.length),
                 borderWidth: 2,
-                borderColor: '#fff',
+                borderColor: 'rgba(15, 23, 42, 0.8)',
+                hoverBorderColor: 'rgba(255,255,255,0.2)',
+                hoverOffset: 6,
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '65%',
             plugins: {
                 legend: {
                     position: 'right',
                     labels: {
-                        font: { size: 11 },
-                        padding: 10,
+                        font: { size: 11, family: 'Plus Jakarta Sans, sans-serif' },
+                        padding: 12,
                         usePointStyle: true,
+                        pointStyleWidth: 8,
+                        color: '#94a3b8',
                     }
                 },
                 tooltip: {
+                    ...glassTooltip,
                     callbacks: {
                         label: function(ctx) {
                             return ` ${ctx.label}: ${ctx.parsed.toFixed(1)}%`;
@@ -369,20 +466,29 @@ function renderProjectionChart(data) {
                 {
                     label: 'Optimista',
                     data: data.optimistic,
-                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
-                    borderRadius: 6,
+                    backgroundColor: 'rgba(16, 185, 129, 0.6)',
+                    borderColor: 'rgba(16, 185, 129, 0.8)',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    borderSkipped: false,
                 },
                 {
                     label: 'Base',
                     data: data.base,
-                    backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                    borderRadius: 6,
+                    backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                    borderColor: 'rgba(59, 130, 246, 0.8)',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    borderSkipped: false,
                 },
                 {
                     label: 'Pesimista',
                     data: data.pessimistic,
-                    backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                    borderRadius: 6,
+                    backgroundColor: 'rgba(239, 68, 68, 0.6)',
+                    borderColor: 'rgba(239, 68, 68, 0.8)',
+                    borderWidth: 1,
+                    borderRadius: 8,
+                    borderSkipped: false,
                 }
             ]
         },
@@ -392,9 +498,16 @@ function renderProjectionChart(data) {
             plugins: {
                 legend: {
                     position: 'top',
-                    labels: { font: { size: 11 }, usePointStyle: true }
+                    labels: {
+                        font: { size: 11 },
+                        usePointStyle: true,
+                        pointStyleWidth: 8,
+                        color: '#94a3b8',
+                        padding: 16,
+                    }
                 },
                 tooltip: {
+                    ...glassTooltip,
                     callbacks: {
                         label: function(ctx) {
                             return ` ${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`;
@@ -405,9 +518,19 @@ function renderProjectionChart(data) {
             scales: {
                 y: {
                     beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.04)', drawTicks: false },
+                    border: { display: false },
                     ticks: {
-                        callback: v => '$' + v.toLocaleString()
+                        callback: v => '$' + v.toLocaleString(),
+                        color: '#64748b',
+                        font: { size: 11 },
+                        padding: 8,
                     }
+                },
+                x: {
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { color: '#64748b', font: { size: 11 } }
                 }
             }
         }
@@ -421,15 +544,21 @@ function renderSummaryChart(data) {
     new Chart(ctx, {
         type: 'bar',
         data: {
-                        labels: ['Ingresos', 'Gastos', 'Ahorro'],
+            labels: ['Ingresos', 'Gastos', 'Ahorro'],
             datasets: [{
                 data: [data.income, data.expenses, data.savings],
                 backgroundColor: [
-                    'rgba(16, 185, 129, 0.8)',
-                    'rgba(239, 68, 68, 0.8)',
-                    'rgba(99, 102, 241, 0.8)',
+                    'rgba(16, 185, 129, 0.65)',
+                    'rgba(239, 68, 68, 0.65)',
+                    'rgba(59, 130, 246, 0.65)',
                 ],
-                borderRadius: 8,
+                borderColor: [
+                    'rgba(16, 185, 129, 0.9)',
+                    'rgba(239, 68, 68, 0.9)',
+                    'rgba(59, 130, 246, 0.9)',
+                ],
+                borderWidth: 1,
+                borderRadius: 10,
                 borderSkipped: false,
             }]
         },
@@ -439,6 +568,7 @@ function renderSummaryChart(data) {
             plugins: {
                 legend: { display: false },
                 tooltip: {
+                    ...glassTooltip,
                     callbacks: {
                         label: function(ctx) {
                             return ` $${ctx.parsed.y.toLocaleString()}`;
@@ -449,13 +579,19 @@ function renderSummaryChart(data) {
             scales: {
                 y: {
                     beginAtZero: true,
+                    grid: { color: 'rgba(255,255,255,0.04)', drawTicks: false },
+                    border: { display: false },
                     ticks: {
-                        callback: v => '$' + v.toLocaleString()
-                    },
-                    grid: { color: 'rgba(0,0,0,0.05)' }
+                        callback: v => '$' + v.toLocaleString(),
+                        color: '#64748b',
+                        font: { size: 11 },
+                        padding: 8,
+                    }
                 },
                 x: {
-                    grid: { display: false }
+                    grid: { display: false },
+                    border: { display: false },
+                    ticks: { color: '#94a3b8', font: { size: 12, weight: '500' } }
                 }
             }
         }
