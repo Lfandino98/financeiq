@@ -117,7 +117,7 @@ El sistema incluye un motor propio que:
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Autores
 
 Desarrollado por:
  - Brayan Caballero
