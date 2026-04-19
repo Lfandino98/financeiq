@@ -23,6 +23,28 @@ El sistema utiliza un motor de análisis propio basado en lógica en Python, sin
 
 ---
 
+## 📷 Images
+
+* ⏳ Inicio de Sesion
+![Dashboard](docs/images/1.Inicio_Sesion.png)
+
+* 📊 Dashboard
+![Dashboard](docs/images/2.Dashboard_Principal.png)
+
+* 🧾 Registro de Ingresos
+![Dashboard](docs/images/4.Ingresos.png)
+
+* 🧾 Registro de Gastos
+![Dashboard](docs/images/6.Gastos.png)
+
+* 🏁 Metas
+![Dashboard](docs/images/8.Metas.png)
+
+* 🧠 Análisis
+![Dashboard](docs/images/10.Analisis.png)
+
+---
+
 ## 🛠️ Tecnologías utilizadas
 
 * Python 3.11
