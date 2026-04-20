@@ -1,0 +1,76 @@
+# ==========================
+# Python
+# ==========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Entornos virtuales
+.env
+.venv
+venv/
+ENV/
+env/
+
+# Archivos de dependencias compiladas
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+
+# ==========================
+# Django
+# ==========================
+# Base de datos local
+db.sqlite3
+db.sqlite3-journal
+
+# Logs
+*.log
+logs/
+
+# Archivos estáticos y media
+staticfiles/
+media/
+
+# Configuración sensible
+.env.*
+settings_local.py
+
+# Cache
+.cache/
+django_cache/
+
+# ==========================
+# Testing / Coverage
+# ==========================
+.coverage
+htmlcov/
+.tox/
+.pytest_cache/
+.nox/
+
+# ==========================
+# IDEs
+# ==========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# ==========================
+# Sistema Operativo
+# ==========================
+.DS_Store
+Thumbs.db
+Desktop.ini
+*~
+
+# ==========================
+# Node (si aplica)
+# ==========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
