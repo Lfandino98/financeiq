@@ -1,0 +1,106 @@
+/* FinanceIQ - Responsive Custom Styles */
+/* Mejoras específicas para mobile y tablets */
+
+/* Mobile Sidebar: Ocultar por defecto, mostrar overlay */
+@media (max-width: 768px) {
+  #sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  #sidebar.active {
+    transform: translateX(0);
+  }
+  
+  #mainContent {
+    margin-left: 0 !important;
+  }
+  
+  /* Overlay para mobile */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 30;
+  }
+  
+  .sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* Improve charts on mobile */
+@media (max-width: 640px) {
+  .chart-container {
+    height: 250px !important;
+  }
+  
+  /* KPI cards stack better */
+  .grid-cols-1 {
+    gap: 1rem;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  aside {
+    width: 80px; /* Compact sidebar */
+  }
+  
+  main {
+    margin-left: 80px !important;
+  }
+  
+  /* Hide text in sidebar nav for compact */
+  aside nav a span:last-child {
+    display: none;
+  }
+}
+
+/* Header responsive padding */
+@media (max-width: 768px) {
+  header .px-8 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  .p-8 {
+    padding: 1.5rem !important;
+  }
+}
+
+/* Button improvements on small screens */
+@media (max-width: 480px) {
+  .btn-primary, .btn-secondary {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Ensure no horizontal scroll */
+html, body {
+  overflow-x: hidden;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices */
+  .glass-card {
+    touch-action: manipulation;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .glass-card {
+    border-width: 0.5px;
+  }
+  
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+}
